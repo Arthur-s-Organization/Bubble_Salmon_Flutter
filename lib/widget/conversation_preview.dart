@@ -32,7 +32,7 @@ class ConversationPreview extends StatelessWidget {
               height: 60,
               width: 60,
               child: Image.asset(
-                "assets/img/placeholderColor2.png",
+                "assets/img/placeholderColor.png",
                 fit: BoxFit.cover,
               ),
             ),
