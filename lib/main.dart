@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/pages/conversation_page.dart';
 import 'package:bubble_salmon/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
@@ -13,6 +14,14 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme, // Utilisation du thème
       home: HomePage(),
+      routes: <String, WidgetBuilder>{
+        '/home': (BuildContext context) => HomePage(),
+        '/conversation': (BuildContext context) => ConversationPage(),
+        '/account': (BuildContext context) => HomePage(),
+        '/contact': (BuildContext context) => HomePage(),
+        '/login': (BuildContext context) => HomePage(),
+        '/register': (BuildContext context) => HomePage(),
+      },
     );
   }
 }

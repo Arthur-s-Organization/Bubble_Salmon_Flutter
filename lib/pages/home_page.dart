@@ -35,12 +35,15 @@ class _HomePageState extends State<HomePage> {
               child: ActionBar(),
             );
           }
-          return ConversationPreview(
-            name: "Arthur Reynet", //conversation.name
-            message: //conversation.lastMessage.text || "placeholder pour une image"
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ",
-            time: Global.formatTime(DateTime
-                .now()), //Global.formatTime(Conversation.lastMessage.createdAt)
+          return InkWell(
+            child: ConversationPreview(
+              name: "Arthur Reynet", //conversation.name
+              message: //conversation.lastMessage.text || "placeholder pour une image"
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ",
+              time: Global.formatTime(DateTime
+                  .now()), //Global.formatTime(Conversation.lastMessage.createdAt)
+            ),
+            onTap: () => Navigator.pushNamed(context, '/conversation'),
           );
         },
         separatorBuilder: (context, index) => const SizedBox(height: 10),

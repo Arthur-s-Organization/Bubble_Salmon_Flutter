@@ -14,26 +14,30 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             backgroundColor: Theme.of(context).colorScheme.tertiary,
             elevation: 0,
             scrolledUnderElevation: 0,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                SvgPicture.asset(
-                  'assets/img/BubbleSalmonLogo.svg',
-                  height: 60,
-                  width: 60,
-                ),
-                Text(
-                  "BubbleSalmon",
-                  style: TextStyle(
-                    fontFamily: 'FiraSans',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                    color: Theme.of(context).colorScheme.primary,
+            title: GestureDetector(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  SvgPicture.asset(
+                    'assets/img/BubbleSalmonLogo.svg',
+                    height: 60,
+                    width: 60,
                   ),
-                ),
-              ],
+                  Text(
+                    "BubbleSalmon",
+                    style: TextStyle(
+                      fontFamily: 'FiraSans',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              onTap: () => Navigator.pushNamed(context, '/home'),
             ),
             centerTitle: false,
+            automaticallyImplyLeading: false,
           ),
           const SizedBox(height: 20),
           Container(
