@@ -26,12 +26,15 @@ class ConversationPreview extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 60,
-            width: 60,
-            child: Image.asset(
-              "assets/img/app_icon.png",
-              fit: BoxFit.cover,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: Container(
+              height: 60,
+              width: 60,
+              child: Image.asset(
+                "assets/img/app_icon.png",
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(width: 16),

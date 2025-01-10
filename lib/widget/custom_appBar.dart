@@ -13,6 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           AppBar(
             backgroundColor: Theme.of(context).colorScheme.tertiary,
             elevation: 0,
+            scrolledUnderElevation: 0,
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
