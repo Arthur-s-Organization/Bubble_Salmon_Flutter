@@ -34,7 +34,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ],
               ),
-              onTap: () => Navigator.pushNamed(context, '/home'),
+              onTap: () {
+                if (ModalRoute.of(context)?.settings.name == '/home') {
+                  return;
+                } else {
+                  Navigator.pushNamed(context, '/home');
+                }
+              },
             ),
             centerTitle: false,
             automaticallyImplyLeading: false,

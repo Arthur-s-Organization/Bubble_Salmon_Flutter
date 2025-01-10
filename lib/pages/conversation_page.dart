@@ -1,4 +1,4 @@
-import 'package:bubble_salmon/widget/custom_appBar.dart';
+import 'package:bubble_salmon/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class ConversationPage extends StatefulWidget {

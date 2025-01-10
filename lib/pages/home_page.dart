@@ -1,8 +1,8 @@
 import 'package:bubble_salmon/global/utils.dart';
-import 'package:bubble_salmon/widget/actionBar.dart';
-import 'package:bubble_salmon/widget/bottomBar.dart';
+import 'package:bubble_salmon/widget/action_bar.dart';
+import 'package:bubble_salmon/widget/bottom_bar.dart';
 import 'package:bubble_salmon/widget/conversation_preview.dart';
-import 'package:bubble_salmon/widget/custom_appBar.dart';
+import 'package:bubble_salmon/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
