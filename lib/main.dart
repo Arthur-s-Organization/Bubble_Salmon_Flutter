@@ -1,6 +1,7 @@
 import 'package:bubble_salmon/pages/conversation_page.dart';
 import 'package:bubble_salmon/pages/home_page.dart';
 import 'package:bubble_salmon/pages/login_page.dart';
+import 'package:bubble_salmon/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
         '/account': (BuildContext context) => HomePage(),
         '/contact': (BuildContext context) => HomePage(),
         '/login': (BuildContext context) => LoginPage(),
-        '/register': (BuildContext context) => HomePage(),
+        '/register': (BuildContext context) => RegisterPage(),
       },
     );
   }
