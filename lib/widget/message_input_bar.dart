@@ -63,7 +63,7 @@ class _MessageInputBarState extends State<MessageInputBar> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Type a message...',
+                  hintText: 'Écrire un message...',
                   hintStyle: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                   ),
