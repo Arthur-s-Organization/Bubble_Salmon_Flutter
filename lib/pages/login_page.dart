@@ -1,8 +1,62 @@
+import 'package:bubble_salmon/repositories/auth_repository.dart';
+import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthRepository _authRepository =
+      AuthRepository(apiAuthService: ApiAuthService());
+
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Veuillez remplir tous les champs.";
+      });
+      return;
+    }
+
+    final response = await _authRepository.login(username, password);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (response["status"] == "success") {
+      print(response["token"]);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Connexion réussie !"),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pushReplacementNamed(context, "/home");
+    } else {
+      setState(() {
+        _errorMessage = response["message"];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +110,7 @@ class LoginPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: TextField(
+                            controller: _usernameController,
                             decoration: InputDecoration(
                               prefixIcon: Icon(
                                 Icons.person_outline,
@@ -78,6 +133,7 @@ class LoginPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: TextField(
+                            controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
                               prefixIcon: Icon(
@@ -94,48 +150,65 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment
-                              .end, // Aligne le bouton à droite
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.secondary,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
+
+                        if (_errorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Text(
+                              _errorMessage!,
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                            ),
+                          ),
+
+                        _isLoading
+                            ? CircularProgressIndicator()
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  const Text(
-                                    "Envoyer",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                  ElevatedButton(
+                                    onPressed: _login,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .tertiaryContainer,
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .secondary,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8, horizontal: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          "Envoyer",
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 16),
-                        // Lien vers l'inscription
+
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -149,7 +222,6 @@ class LoginPage extends StatelessWidget {
                             ),
                             GestureDetector(
                               onTap: () {
-                                // Redirection vers l'inscription
                                 Navigator.pushNamed(context, '/register');
                               },
                               child: Text(
