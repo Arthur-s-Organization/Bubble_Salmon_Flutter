@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class MessageInputBar extends StatefulWidget {
   final void Function(String)? onSendMessage;
-  final VoidCallback? onAttachmentPressed;
+  final void Function(XFile)? onImageSelected;
   final FocusNode? focusNode;
 
   const MessageInputBar({
     super.key,
     this.onSendMessage,
-    this.onAttachmentPressed,
+    this.onImageSelected,
     this.focusNode,
   });
 
@@ -18,6 +19,45 @@ class MessageInputBar extends StatefulWidget {
 
 class _MessageInputBarState extends State<MessageInputBar> {
   final TextEditingController _messageController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _showImageSourceDialog() async {
+    await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Prendre une photo'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? photo =
+                      await _picker.pickImage(source: ImageSource.camera);
+                  if (photo != null && widget.onImageSelected != null) {
+                    widget.onImageSelected!(photo);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choisir depuis la galerie'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final XFile? image =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null && widget.onImageSelected != null) {
+                    widget.onImageSelected!(image);
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   void dispose() {
@@ -53,7 +93,7 @@ class _MessageInputBarState extends State<MessageInputBar> {
             IconButton(
               icon:
                   Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
-              onPressed: widget.onAttachmentPressed,
+              onPressed: _showImageSourceDialog,
             ),
             Expanded(
               child: TextField(
@@ -63,7 +103,7 @@ class _MessageInputBarState extends State<MessageInputBar> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Écrire un message...',
+                  hintText: 'Type a message...',
                   hintStyle: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                   ),
