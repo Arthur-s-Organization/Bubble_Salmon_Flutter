@@ -1,7 +1,9 @@
 import 'package:bubble_salmon/services/auth_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthRepository {
   final ApiAuthService apiAuthService;
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   const AuthRepository({
     required this.apiAuthService,
@@ -19,9 +21,13 @@ class AuthRepository {
         };
       }
 
+      String token = response["body"];
+
+      await storage.write(key: "jwt_token", value: token);
+
       return {
         "status": "success",
-        "token": response["body"],
+        "token": token,
         "message": "Connexion réussie",
       };
     } catch (e) {
@@ -30,6 +36,10 @@ class AuthRepository {
         "message": "Erreur lors de la connexion : ${e.toString()}",
       };
     }
+  }
+
+  Future<String?> getToken() async {
+    return await storage.read(key: "jwt_token");
   }
 
   Future<Map<String, dynamic>> register(
@@ -61,7 +71,6 @@ class AuthRepository {
 
       return {
         "status": "success",
-        "token": response["body"],
         "message": "Compte enregistré",
       };
     } catch (e) {

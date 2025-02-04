@@ -113,7 +113,7 @@ class _RegisterPageState extends State<RegisterPage> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pushReplacementNamed(context, "/home");
+      Navigator.pushReplacementNamed(context, "/login");
     } else {
       setState(() {
         _errorMessage = response["message"];

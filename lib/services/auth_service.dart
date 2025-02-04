@@ -16,10 +16,7 @@ class ApiAuthService {
       }),
     );
 
-    return {
-      "statusCode": response.statusCode,
-      "body": jsonDecode(response.body)
-    };
+    return {"statusCode": response.statusCode, "body": response.body};
   }
 
   Future<Map<String, dynamic>> register(

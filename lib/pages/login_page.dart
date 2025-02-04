@@ -43,7 +43,6 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     if (response["status"] == "success") {
-      print(response["token"]);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Connexion réussie !"),
