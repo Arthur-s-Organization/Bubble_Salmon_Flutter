@@ -148,10 +148,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 32),
                         buildInputField(context, _firstNameController, 'Prénom',
-                            Icons.person_outline),
+                            Icons.badge_outlined),
                         const SizedBox(height: 16),
                         buildInputField(context, _lastNameController, 'Nom',
-                            Icons.person_outline),
+                            Icons.account_box_outlined),
                         const SizedBox(height: 16),
                         buildInputField(context, _usernameController,
                             'Nom d’utilisateur', Icons.person_outline),
@@ -214,7 +214,18 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 16),
                         if (_imageFile != null)
-                          Image.file(_imageFile!, height: 100, width: 100),
+                          Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.greenAccent,
+                              image: DecorationImage(
+                                image: FileImage(_imageFile!),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 24),
                         _isLoading
                             ? const CircularProgressIndicator()
