@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/global/dependency_injection.dart';
 import 'package:bubble_salmon/pages/conversation_page.dart';
 import 'package:bubble_salmon/pages/home_page.dart';
 import 'package:bubble_salmon/pages/login_page.dart';
@@ -22,21 +23,26 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       initialRoute: '/login',
-      supportedLocales: const [
-        Locale('fr', 'FR'),
-      ],
+      supportedLocales: const [Locale('fr', 'FR')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => HomePage(),
-        '/conversation': (BuildContext context) => ConversationPage(),
-        '/account': (BuildContext context) => HomePage(),
-        '/contact': (BuildContext context) => HomePage(),
-        '/login': (BuildContext context) => LoginPage(),
-        '/register': (BuildContext context) => RegisterPage(),
+        '/home': (context) => HomePage(),
+        '/conversation': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return ConversationPage(
+            conversationId: args['conversationId'],
+            conversationRepository: DependencyInjection.conversationRepository,
+          );
+        },
+        '/account': (context) => HomePage(),
+        '/contact': (context) => HomePage(),
+        '/login': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
       },
     );
   }
