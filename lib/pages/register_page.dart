@@ -1,7 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -18,7 +21,10 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   DateTime? _selectedBirthDate;
+  File? _imageFile;
+  String? _base64Image;
 
+  final ImagePicker _picker = ImagePicker();
   final AuthRepository _authRepository =
       AuthRepository(apiAuthService: ApiAuthService());
 
@@ -32,23 +38,26 @@ class _RegisterPageState extends State<RegisterPage> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       locale: const Locale("fr", "FR"),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Theme.of(context).colorScheme.primary,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null && picked != _selectedBirthDate) {
       setState(() {
         _selectedBirthDate = picked;
+      });
+    }
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      List<int> imageBytes = await imageFile.readAsBytes();
+      String base64Image = base64Encode(imageBytes);
+
+      setState(() {
+        _imageFile = imageFile;
+        _base64Image = base64Image;
       });
     }
   }
@@ -73,10 +82,12 @@ class _RegisterPageState extends State<RegisterPage> {
         username.isEmpty ||
         password.isEmpty ||
         phone.isEmpty ||
-        birthDate.isEmpty) {
+        birthDate.isEmpty ||
+        _base64Image == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Veuillez remplir tous les champs.";
+        _errorMessage =
+            "Veuillez remplir tous les champs et choisir une photo.";
       });
       return;
     }
@@ -88,6 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
       password,
       phone,
       birthDate,
+      _base64Image!,
     );
 
     setState(() {
@@ -113,7 +125,6 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
         body: SafeArea(
           child: Column(
             children: [
@@ -126,78 +137,96 @@ class _RegisterPageState extends State<RegisterPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 32),
-                        Text(
+                        const Text(
                           "Créer un compte",
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 18,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimary,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 32),
-                        buildInputField(
-                          context,
-                          controller: _firstNameController,
-                          hintText: 'Prénom',
-                          icon: Icons.badge_outlined,
-                        ),
+                        buildInputField(context, _firstNameController, 'Prénom',
+                            Icons.badge_outlined),
                         const SizedBox(height: 16),
-                        buildInputField(
-                          context,
-                          controller: _lastNameController,
-                          hintText: 'Nom',
-                          icon: Icons.account_box_outlined,
-                        ),
+                        buildInputField(context, _lastNameController, 'Nom',
+                            Icons.account_box_outlined),
                         const SizedBox(height: 16),
-                        buildInputField(
-                          context,
-                          controller: _usernameController,
-                          hintText: 'Nom d’utilisateur',
-                          icon: Icons.person_outline,
-                        ),
+                        buildInputField(context, _usernameController,
+                            'Nom d’utilisateur', Icons.person_outline),
                         const SizedBox(height: 16),
-                        buildInputField(
-                          context,
-                          controller: _passwordController,
-                          hintText: 'Mot de passe',
-                          icon: Icons.lock_outline,
-                          obscureText: true,
-                        ),
+                        buildInputField(context, _passwordController,
+                            'Mot de passe', Icons.lock_outline,
+                            obscureText: true),
                         const SizedBox(height: 16),
-                        buildInputField(
-                          context,
-                          controller: _phoneController,
-                          hintText: 'Numéro de téléphone',
-                          icon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                        ),
+                        buildInputField(context, _phoneController,
+                            'Numéro de téléphone', Icons.phone_outlined,
+                            keyboardType: TextInputType.phone),
                         const SizedBox(height: 16),
                         GestureDetector(
                           onTap: () => _selectBirthDate(context),
                           child: AbsorbPointer(
                             child: buildInputField(
-                              context,
-                              hintText: _selectedBirthDate == null
-                                  ? 'Date de naissance'
-                                  : DateFormat("dd/MM/yyyy")
-                                      .format(_selectedBirthDate!),
-                              icon: Icons.calendar_today_outlined,
-                            ),
+                                context,
+                                null,
+                                _selectedBirthDate == null
+                                    ? 'Date de naissance'
+                                    : DateFormat("dd/MM/yyyy")
+                                        .format(_selectedBirthDate!),
+                                Icons.calendar_today_outlined),
                           ),
                         ),
                         const SizedBox(height: 24),
-                        if (_errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            children: [
+                              const Text("Choisir une photo de profil",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  )),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.image,
+                                        color: Colors.redAccent),
+                                    onPressed: () =>
+                                        _pickImage(ImageSource.gallery),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  IconButton(
+                                    icon: const Icon(Icons.camera_alt,
+                                        color: Colors.redAccent),
+                                    onPressed: () =>
+                                        _pickImage(ImageSource.camera),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        if (_imageFile != null)
+                          Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.greenAccent,
+                              image: DecorationImage(
+                                image: FileImage(_imageFile!),
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
+                        const SizedBox(height: 24),
                         _isLoading
                             ? const CircularProgressIndicator()
                             : Row(
@@ -255,31 +284,24 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget buildInputField(BuildContext context,
-      {required String hintText,
-      required IconData icon,
-      bool obscureText = false,
-      TextInputType keyboardType = TextInputType.text,
-      TextEditingController? controller}) {
+      TextEditingController? controller, String hintText, IconData icon,
+      {bool obscureText = false,
+      TextInputType keyboardType = TextInputType.text}) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
-          prefixIcon: Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          prefixIcon: Icon(icon, color: Colors.redAccent),
           hintText: hintText,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: 16,
-            horizontal: 12,
-          ),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         ),
       ),
     );

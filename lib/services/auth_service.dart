@@ -16,7 +16,10 @@ class ApiAuthService {
       }),
     );
 
-    return {"statusCode": response.statusCode, "body": response.body};
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
   }
 
   Future<Map<String, dynamic>> register(
@@ -26,8 +29,10 @@ class ApiAuthService {
     String password,
     String phone,
     String birthdate,
+    String profilePicture,
   ) async {
     String url = "${dotenv.env['API_URL']}/User/register";
+
     final http.Response response = await http.post(
       Uri.parse(url),
       headers: {
@@ -39,10 +44,14 @@ class ApiAuthService {
         "Firstname": firstname,
         "Lastname": lastname,
         "Phone": phone,
-        "BirthDate": birthdate
+        "BirthDate": birthdate,
+        "Image": profilePicture,
       }),
     );
 
-    return {"statusCode": response.statusCode, "body": response.body};
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
   }
 }
