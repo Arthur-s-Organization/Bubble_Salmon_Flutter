@@ -39,10 +39,18 @@ class AuthRepository {
     String password,
     String phone,
     String birthdate,
+    String profilePicture,
   ) async {
     try {
       Map<String, dynamic> response = await apiAuthService.register(
-          firstname, lastname, username, password, phone, birthdate);
+        firstname,
+        lastname,
+        username,
+        password,
+        phone,
+        birthdate,
+        profilePicture,
+      );
 
       if (response["statusCode"] != 200) {
         return {
