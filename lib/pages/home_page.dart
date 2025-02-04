@@ -1,4 +1,6 @@
 import 'package:bubble_salmon/global/utils.dart';
+import 'package:bubble_salmon/repositories/conversation_repository.dart';
+import 'package:bubble_salmon/services/conversation_service.dart';
 import 'package:bubble_salmon/widget/action_bar.dart';
 import 'package:bubble_salmon/widget/bottom_bar.dart';
 import 'package:bubble_salmon/widget/conversation_preview.dart';
@@ -14,6 +16,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 1;
+  List<dynamic> _conversations = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+  final ConversationRepository _conversationRepository =
+      ConversationRepository(apiConversationService: ApiConversationService());
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConversations();
+  }
+
+  Future<void> _loadConversations() async {
+    final response = await _conversationRepository.conversationsPreview();
+
+    setState(() {
+      _isLoading = false;
+
+      if (response["status"] == "success") {
+        _conversations = response["conversations"];
+      } else {
+        _errorMessage = response["message"];
+      }
+    });
+  }
 
   void _onTabSelected(int index) {
     setState(() {
@@ -25,29 +52,42 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: ListView.separated(
-        padding: const EdgeInsets.only(top: 12),
-        itemCount: 11, // conversation.length +1 (Pour l'actionBar)
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: ActionBar(),
-            );
-          }
-          return InkWell(
-            child: ConversationPreview(
-              name: "Arthur Reynet", //conversation.name
-              message: //conversation.lastMessage.text || "placeholder pour une image"
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ",
-              time: Global.formatTime(DateTime
-                  .now()), //Global.formatTime(Conversation.lastMessage.createdAt)
-            ),
-            onTap: () => Navigator.pushNamed(context, '/conversation'),
-          );
-        },
-        separatorBuilder: (context, index) => const SizedBox(height: 10),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator()) // Loader
+          : _conversations.isEmpty
+              ? const Center(
+                  // Placeholder si aucune conversation
+                  child: Text(
+                    "Aucune conversation pour le moment.",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.only(top: 12),
+                  itemCount: _conversations.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: ActionBar(),
+                      );
+                    }
+                    final conversation = _conversations[index - 1];
+                    return InkWell(
+                      child: ConversationPreview(
+                        name: conversation["name"] ??
+                            "Pas de nom pour l'instant", // Nom de l'utilisateur ou de la conversation
+                        message: conversation["lastMessage"] ?? "Aucun message",
+                        time: Global.formatTime(DateTime
+                            .now()), // Update quand on aura le last message
+                      ),
+                      onTap: () =>
+                          Navigator.pushNamed(context, '/conversation'),
+                    );
+                  },
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 10),
+                ),
       bottomNavigationBar:
           BottomBar(currentIndex: _currentIndex, onTabSelected: _onTabSelected),
     );
