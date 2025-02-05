@@ -68,18 +68,20 @@ class _HomePageState extends State<HomePage> {
                     final conversation = _conversations[index - 1];
                     return InkWell(
                       child: ConversationPreview(
-                        name: conversation["name"] ??
-                            "Pas de nom pour l'instant", // Nom de l'utilisateur ou de la conversation
-                        message: conversation["lastMessage"] ?? "Aucun message",
-                        time: Global.formatTime(DateTime
-                            .now()), // Update quand on aura le last message
+                        name:
+                            conversation["name"] ?? "Pas de nom pour l'instant",
+                        message: conversation["last_message"]?["text"] ??
+                            "Aucun message", // Get text from last_message
+                        time: Global.formatTime(DateTime.parse(
+                            conversation?["last_message"]["createdAt"] ??
+                                ["createdAt"])), // Parse createdAt
                       ),
                       onTap: () => Navigator.pushNamed(
                         context,
                         '/conversation',
                         arguments: {
                           'conversationId': conversation["id"].toString()
-                        }, // Assurez-vous que 'id' existe dans votre conversation
+                        },
                       ),
                     );
                   },
