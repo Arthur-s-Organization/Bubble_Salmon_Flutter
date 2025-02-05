@@ -1,4 +1,4 @@
-import 'package:bubble_salmon/class/conversation.dart';
+import 'package:bubble_salmon/class/message.dart';
 import 'package:flutter/material.dart';
 
 enum BubbleType { sender, receiver }

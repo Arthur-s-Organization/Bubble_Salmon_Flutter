@@ -1,4 +1,4 @@
-import 'package:bubble_salmon/class/conversation.dart';
+import 'package:bubble_salmon/class/message.dart';
 import 'package:bubble_salmon/services/conversation_service.dart';
 
 class ConversationRepository {
@@ -50,7 +50,6 @@ class ConversationRepository {
       final List<Message> messages = (response["body"] as List)
           .map((json) => Message.fromJson(json))
           .toList();
-      print(messages);
       return {
         "status": "success",
         "message": "Messages récupérés",

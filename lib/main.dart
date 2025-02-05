@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
           return ConversationPage(
             conversationId: args['conversationId'],
             conversationRepository: DependencyInjection.conversationRepository,
+            authRepository: DependencyInjection.authRepository,
           );
         },
         '/account': (context) => HomePage(),

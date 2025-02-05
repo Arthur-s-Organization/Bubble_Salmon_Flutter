@@ -53,9 +53,9 @@ class ApiConversationService {
         'Content-Type': "application/json",
       },
       body: jsonEncode({
-        "conversationId": conversationId,
-        if (text != null) "text": text,
-        if (base64Image != null) "image": base64Image,
+        "ConversationId": conversationId,
+        if (text != null) "Text": text,
+        if (base64Image != null) "Image": base64Image,
       }),
     );
 

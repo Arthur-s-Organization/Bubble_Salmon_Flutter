@@ -1,20 +1,24 @@
 import 'dart:convert';
-import 'package:bubble_salmon/class/conversation.dart';
+import 'package:bubble_salmon/class/message.dart';
+import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/repositories/conversation_repository.dart';
 import 'package:bubble_salmon/widget/conversation/conversation_app_bar.dart';
 import 'package:bubble_salmon/widget/conversation/message_input_bar.dart';
 import 'package:bubble_salmon/widget/conversation/message_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:async';
 
 class ConversationPage extends StatefulWidget {
   final String conversationId;
   final ConversationRepository conversationRepository;
+  final AuthRepository authRepository;
 
   const ConversationPage({
     super.key,
     required this.conversationId,
     required this.conversationRepository,
+    required this.authRepository,
   });
 
   @override
@@ -22,23 +26,67 @@ class ConversationPage extends StatefulWidget {
 }
 
 class _ConversationPageState extends State<ConversationPage> {
+  Timer? _refreshTimer;
   final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController =
+      ScrollController(); // Add ScrollController
   List<Message> _messages = [];
-  String? currentUserId; // À récupérer depuis votre système d'authentification
+  String? currentUserId;
+  bool _isLoading = false;
+  bool _isInitialLoad = true;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _loadMessages();
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _focusNode.dispose();
+    _scrollController.dispose(); // Dispose ScrollController
+    super.dispose();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   Future<void> _loadMessages() async {
-    final result =
-        await widget.conversationRepository.getMessages(widget.conversationId);
-    if (result["status"] == "success") {
-      setState(() {
-        _messages = result["messages"];
-      });
+    if (_isLoading) return;
+
+    _isLoading = true;
+    try {
+      final result = await widget.conversationRepository
+          .getMessages(widget.conversationId);
+      if (result["status"] == "success") {
+        setState(() {
+          _messages = List<Message>.from(result["messages"])
+            ..sort(
+                (Message a, Message b) => a.createdAt.compareTo(b.createdAt));
+        });
+
+        // On ne scrolle que lors du chargement initial
+        if (_isInitialLoad) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToBottom();
+            _isInitialLoad =
+                false; // On marque le chargement initial comme terminé
+          });
+        }
+      }
+    } finally {
+      _isLoading = false;
     }
   }
 
@@ -46,7 +94,8 @@ class _ConversationPageState extends State<ConversationPage> {
     final result = await widget.conversationRepository
         .sendMessage(widget.conversationId, message, null);
     if (result["status"] == "success") {
-      _loadMessages();
+      await _loadMessages();
+      _scrollToBottom(); // Scroll after sending message
     }
   }
 
@@ -56,7 +105,8 @@ class _ConversationPageState extends State<ConversationPage> {
     final result = await widget.conversationRepository
         .sendMessage(widget.conversationId, null, base64Image);
     if (result["status"] == "success") {
-      _loadMessages();
+      await _loadMessages();
+      _scrollToBottom(); // Scroll after sending image
     }
   }
 
@@ -70,6 +120,7 @@ class _ConversationPageState extends State<ConversationPage> {
           children: [
             Expanded(
               child: ListView.builder(
+                controller: _scrollController, // Add controller to ListView
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
