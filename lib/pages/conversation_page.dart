@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bubble_salmon/class/message.dart';
+import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/repositories/conversation_repository.dart';
 import 'package:bubble_salmon/widget/conversation/conversation_app_bar.dart';
@@ -126,7 +127,8 @@ class _ConversationPageState extends State<ConversationPage> {
                   final message = _messages[index];
                   return MessageBubble(
                     message: message.text ?? '',
-                    time: message.createdAt.toString(),
+                    time: Global.formatTime(
+                        DateTime.parse(message.createdAt.toString())),
                     messageType: message.messageType,
                     bubbleType: message.userId == currentUserId
                         ? BubbleType.sender
