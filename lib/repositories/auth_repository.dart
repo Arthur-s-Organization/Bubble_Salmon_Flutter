@@ -109,4 +109,32 @@ class AuthRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getUserId() async {
+    try {
+      String? token = await getToken();
+      if (token == null) {
+        return {"status": "error", "message": "Utilisateur non connecté"};
+      }
+
+      Map<String, dynamic> response = await apiAuthService.getUser(token);
+
+      if (response["statusCode"] != 200) {
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ?? "Erreur inconnue",
+        };
+      }
+      return {
+        "status": "success",
+        "user": response["body"]["id"],
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message":
+            "Erreur lors de la récupération de l'utilisateur : ${e.toString()}",
+      };
+    }
+  }
 }

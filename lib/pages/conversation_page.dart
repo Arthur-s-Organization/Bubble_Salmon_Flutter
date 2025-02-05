@@ -39,6 +39,7 @@ class _ConversationPageState extends State<ConversationPage> {
   @override
   void initState() {
     super.initState();
+    _initializeUser();
     _loadMessages();
     _refreshTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _loadMessages();
@@ -60,6 +61,15 @@ class _ConversationPageState extends State<ConversationPage> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
+    }
+  }
+
+  Future<void> _initializeUser() async {
+    final result = await widget.authRepository.getUserId();
+    if (result["status"] == "success") {
+      setState(() {
+        currentUserId = result["user"].toString();
+      });
     }
   }
 
