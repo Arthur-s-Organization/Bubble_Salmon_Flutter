@@ -51,17 +51,17 @@ class _AccountPageState extends State<AccountPage> {
                         child: Container(
                           height: 80,
                           width: 80,
-                          child:
-                              // user!.imageFileName != null
-                              //     ? Image.network(
-                              //         '${user!.imageRepository}/${user!.imageFileName}',
-                              //         fit: BoxFit.cover,
-                              //       )
-                              //     :
-                              Image.asset(
-                            "assets/img/placeholderColor.png",
-                            fit: BoxFit.cover,
-                          ),
+                          child: user!.imageFileName != null &&
+                                  user!.imageRepository != null
+                              ? Image.network(
+                                  Global.getImagePath(user!.imageRepository!,
+                                      user!.imageFileName!),
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  "assets/img/placeholderColor.png",
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
                       const SizedBox(height: 10),
