@@ -75,6 +75,10 @@ class _HomePageState extends State<HomePage> {
                         time: Global.formatTime(DateTime.parse(
                             conversation?["last_message"]["createdAt"] ??
                                 ["createdAt"])), // Parse createdAt
+                        // imageFileName: conversation["image_filename"],
+                        // imageRepository: conversation["image_repository"],
+                        imageFileName: "",
+                        imageRepository: "",
                       ),
                       onTap: () => Navigator.pushNamed(
                         context,
