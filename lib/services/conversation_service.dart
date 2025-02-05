@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:bubble_salmon/global/utils.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +10,7 @@ class ApiConversationService {
 
   Future<Map<String, dynamic>> conversationsPreview() async {
     String url = "${dotenv.env['API_URL']}/Conversation/getAll";
-    String? token = await storage.read(key: "jwt_token");
+    String? token = await Global.getToken();
 
     final http.Response response = await http.get(
       Uri.parse(url),
@@ -26,7 +27,7 @@ class ApiConversationService {
 
   Future<Map<String, dynamic>> getMessages(String conversationId) async {
     String url = "${dotenv.env['API_URL']}/Message/getAll/$conversationId";
-    String? token = await storage.read(key: "jwt_token");
+    String? token = await Global.getToken();
 
     final http.Response response = await http.get(
       Uri.parse(url),
@@ -44,7 +45,8 @@ class ApiConversationService {
   Future<Map<String, dynamic>> sendMessage(
       String conversationId, String? text, String? base64Image) async {
     String url = "${dotenv.env['API_URL']}/Message/Add";
-    String? token = await storage.read(key: "jwt_token");
+    String? token = await Global.getToken();
+
     final response = await http.post(
       Uri.parse(url),
       headers: {
