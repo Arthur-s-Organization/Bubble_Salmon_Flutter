@@ -1,17 +1,20 @@
+import 'package:bubble_salmon/global/utils.dart';
 import 'package:flutter/material.dart';
 
 class ConversationPreview extends StatelessWidget {
   final String name;
   final String message;
   final String time;
-  final Color avatarColor;
+  final String? imageRepository;
+  final String? imageFileName;
 
   const ConversationPreview({
     super.key,
     required this.name,
     required this.message,
     required this.time,
-    this.avatarColor = Colors.green,
+    this.imageRepository,
+    this.imageFileName,
   });
 
   @override
@@ -31,10 +34,15 @@ class ConversationPreview extends StatelessWidget {
             child: Container(
               height: 60,
               width: 60,
-              child: Image.asset(
-                "assets/img/placeholderColor.png",
-                fit: BoxFit.cover,
-              ),
+              child: imageFileName != null && imageRepository != null
+                  ? Image.network(
+                      Global.getImagePath(imageRepository!, imageFileName!),
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      "assets/img/placeholderColor.png",
+                      fit: BoxFit.cover,
+                    ),
             ),
           ),
           const SizedBox(width: 16),

@@ -35,9 +35,6 @@ class Message {
 
   MessageType get messageType =>
       imageFileName != null ? MessageType.image : MessageType.text;
-  String get imageUrl => imageRepository != null && imageFileName != null
-      ? "$imageRepository/$imageFileName"
-      : '';
 }
 
 enum MessageType { text, image }

@@ -74,7 +74,9 @@ class _HomePageState extends State<HomePage> {
                             "Aucun message", // Get text from last_message
                         time: Global.formatTime(DateTime.parse(
                             conversation?["last_message"]["createdAt"] ??
-                                ["createdAt"])), // Parse createdAt
+                                DateTime.now().toString())), // Parse createdAt
+                        imageFileName: conversation["image_filename"],
+                        imageRepository: conversation["image_repository"],
                       ),
                       onTap: () => Navigator.pushNamed(
                         context,

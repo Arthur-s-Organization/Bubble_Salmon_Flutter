@@ -143,7 +143,11 @@ class _ConversationPageState extends State<ConversationPage> {
                     bubbleType: message.userId == currentUserId
                         ? BubbleType.sender
                         : BubbleType.receiver,
-                    imageUrl: message.imageUrl,
+                    imageUrl: message.imageRepository != null &&
+                            message.imageFileName != null
+                        ? Global.getImagePath(
+                            message.imageRepository!, message.imageFileName!)
+                        : null,
                   );
                 },
               ),
