@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -36,10 +37,6 @@ class AuthRepository {
         "message": "Erreur lors de la connexion : ${e.toString()}",
       };
     }
-  }
-
-  Future<String?> getToken() async {
-    return await storage.read(key: "jwt_token");
   }
 
   Future<Map<String, dynamic>> register(
@@ -83,7 +80,7 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> getUser() async {
     try {
-      String? token = await getToken();
+      String? token = await Global.getToken();
       if (token == null) {
         return {"status": "error", "message": "Utilisateur non connecté"};
       }
@@ -112,7 +109,7 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> getUserId() async {
     try {
-      String? token = await getToken();
+      String? token = await Global.getToken();
       if (token == null) {
         return {"status": "error", "message": "Utilisateur non connecté"};
       }

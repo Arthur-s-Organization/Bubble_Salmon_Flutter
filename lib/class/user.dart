@@ -37,4 +37,10 @@ class User {
       updatedAt: DateTime.parse(json['updated_at']),
     );
   }
+  static List<User> listFromJson(List<dynamic> list) {
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map((item) => User.fromJson(item))
+        .toList();
+  }
 }
