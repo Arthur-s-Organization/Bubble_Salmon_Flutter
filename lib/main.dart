@@ -1,4 +1,5 @@
 import 'package:bubble_salmon/global/dependency_injection.dart';
+import 'package:bubble_salmon/pages/account_page.dart';
 import 'package:bubble_salmon/pages/conversation_page.dart';
 import 'package:bubble_salmon/pages/home_page.dart';
 import 'package:bubble_salmon/pages/login_page.dart';
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
             authRepository: DependencyInjection.authRepository,
           );
         },
-        '/account': (context) => HomePage(),
+        '/account': (context) => AccountPage(),
         '/contact': (context) => HomePage(),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),

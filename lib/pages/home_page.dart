@@ -15,7 +15,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 1;
   List<dynamic> _conversations = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -39,12 +38,6 @@ class _HomePageState extends State<HomePage> {
       } else {
         _errorMessage = response["message"];
       }
-    });
-  }
-
-  void _onTabSelected(int index) {
-    setState(() {
-      _currentIndex = index;
     });
   }
 
@@ -93,8 +86,7 @@ class _HomePageState extends State<HomePage> {
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 10),
                 ),
-      bottomNavigationBar:
-          BottomBar(currentIndex: _currentIndex, onTabSelected: _onTabSelected),
+      bottomNavigationBar: BottomBar(currentIndex: 1, context: context),
     );
   }
 }

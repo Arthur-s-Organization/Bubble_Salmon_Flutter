@@ -51,4 +51,20 @@ class ApiAuthService {
       "body": jsonDecode(response.body)
     };
   }
+
+  Future<Map<String, dynamic>> getUser(String token) async {
+    String url = "${dotenv.env['API_URL']}/User/show";
+    final http.Response response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': "application/json",
+      },
+    );
+
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
 }
