@@ -45,7 +45,6 @@ class ApiConversationService {
       String conversationId, String? text, String? base64Image) async {
     String url = "${dotenv.env['API_URL']}/Message/Add";
     String? token = await storage.read(key: "jwt_token");
-
     final response = await http.post(
       Uri.parse(url),
       headers: {
@@ -55,10 +54,10 @@ class ApiConversationService {
       body: jsonEncode({
         "ConversationId": conversationId,
         if (text != null) "Text": text,
+        if (text == null) "Text": null,
         if (base64Image != null) "Image": base64Image,
       }),
     );
-
     return {
       "statusCode": response.statusCode,
       "body": jsonDecode(response.body)

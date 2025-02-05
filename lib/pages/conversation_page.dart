@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:bubble_salmon/class/message.dart';
 import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/repositories/auth_repository.dart';
@@ -7,7 +6,6 @@ import 'package:bubble_salmon/widget/conversation/conversation_app_bar.dart';
 import 'package:bubble_salmon/widget/conversation/message_input_bar.dart';
 import 'package:bubble_salmon/widget/conversation/message_bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 
 class ConversationPage extends StatefulWidget {
@@ -101,23 +99,15 @@ class _ConversationPageState extends State<ConversationPage> {
     }
   }
 
-  Future<void> _handleSendMessage(String message) async {
-    final result = await widget.conversationRepository
-        .sendMessage(widget.conversationId, message, null);
-    if (result["status"] == "success") {
-      await _loadMessages();
-      _scrollToBottom(); // Scroll after sending message
-    }
-  }
+  Future<void> _handleSendMessage(String? text, String? base64Image) async {
+    // Vérifier qu'au moins l'un des deux paramètres est non null
+    if (text == null && base64Image == null) return;
 
-  Future<void> _handleImageSelected(XFile image) async {
-    final bytes = await image.readAsBytes();
-    final base64Image = base64Encode(bytes);
     final result = await widget.conversationRepository
-        .sendMessage(widget.conversationId, null, base64Image);
+        .sendMessage(widget.conversationId, text, base64Image);
     if (result["status"] == "success") {
       await _loadMessages();
-      _scrollToBottom(); // Scroll after sending image
+      _scrollToBottom();
     }
   }
 
@@ -154,8 +144,9 @@ class _ConversationPageState extends State<ConversationPage> {
             ),
             MessageInputBar(
               focusNode: _focusNode,
-              onSendMessage: _handleSendMessage,
-              onImageSelected: _handleImageSelected,
+              onSendMessage: (text, base64Image) async {
+                await _handleSendMessage(text, base64Image);
+              },
             ),
           ],
         ),

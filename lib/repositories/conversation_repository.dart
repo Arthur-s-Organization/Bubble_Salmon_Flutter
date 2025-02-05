@@ -68,6 +68,14 @@ class ConversationRepository {
   Future<Map<String, dynamic>> sendMessage(
       String conversationId, String? text, String? base64Image) async {
     try {
+      // Vérifier qu'au moins l'un des deux paramètres est non null
+      if (text == null && base64Image == null) {
+        return {
+          "status": "error",
+          "message": "Le message doit contenir du texte ou une image",
+        };
+      }
+
       final response = await apiConversationService.sendMessage(
           conversationId, text, base64Image);
 
