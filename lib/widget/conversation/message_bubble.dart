@@ -1,6 +1,5 @@
+import 'package:bubble_salmon/class/message.dart';
 import 'package:flutter/material.dart';
-
-enum MessageType { text, image }
 
 enum BubbleType { sender, receiver }
 

@@ -81,8 +81,13 @@ class _HomePageState extends State<HomePage> {
                         time: Global.formatTime(DateTime
                             .now()), // Update quand on aura le last message
                       ),
-                      onTap: () =>
-                          Navigator.pushNamed(context, '/conversation'),
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        '/conversation',
+                        arguments: {
+                          'conversationId': conversation["id"].toString()
+                        }, // Assurez-vous que 'id' existe dans votre conversation
+                      ),
                     );
                   },
                   separatorBuilder: (context, index) =>

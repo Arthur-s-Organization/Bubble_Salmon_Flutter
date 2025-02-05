@@ -18,6 +18,46 @@ class ApiConversationService {
         'Content-Type': "application/json",
       },
     );
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
+
+  Future<Map<String, dynamic>> getMessages(String conversationId) async {
+    String url = "${dotenv.env['API_URL']}/Message/getAll/$conversationId";
+    String? token = await storage.read(key: "jwt_token");
+
+    final http.Response response = await http.get(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        'Content-Type': "application/json",
+      },
+    );
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
+
+  Future<Map<String, dynamic>> sendMessage(
+      String conversationId, String? text, String? base64Image) async {
+    String url = "${dotenv.env['API_URL']}/Message/Add";
+    String? token = await storage.read(key: "jwt_token");
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        'Content-Type': "application/json",
+      },
+      body: jsonEncode({
+        "ConversationId": conversationId,
+        if (text != null) "Text": text,
+        if (base64Image != null) "Image": base64Image,
+      }),
+    );
 
     return {
       "statusCode": response.statusCode,
