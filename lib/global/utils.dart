@@ -1,5 +1,7 @@
+import 'package:bubble_salmon/global/http_interceptor.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
 
 class Global {
   static String formatTime(DateTime dateTime) {
@@ -23,4 +25,6 @@ class Global {
     final FlutterSecureStorage storage = const FlutterSecureStorage();
     await storage.delete(key: "jwt_token");
   }
+
+  static final http.Client httpClient = HttpInterceptor();
 }

@@ -97,16 +97,7 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> getUser() async {
     try {
-      String? token = await Global.getToken();
-      if (token == null) {
-        return {
-          "status": "error",
-          "message": "Token non trouvé",
-          "user": null,
-        };
-      }
-
-      Map<String, dynamic> response = await apiAuthService.getUser(token);
+      Map<String, dynamic> response = await apiAuthService.getUser();
 
       if (response["statusCode"] != 200) {
         return {
@@ -135,12 +126,7 @@ class AuthRepository {
 
   Future<Map<String, dynamic>> getUserId() async {
     try {
-      String? token = await Global.getToken();
-      if (token == null) {
-        return {"status": "error", "message": "Utilisateur non connecté"};
-      }
-
-      Map<String, dynamic> response = await apiAuthService.getUser(token);
+      Map<String, dynamic> response = await apiAuthService.getUser();
 
       if (response["statusCode"] != 200) {
         return {

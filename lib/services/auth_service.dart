@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bubble_salmon/global/utils.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,12 +53,11 @@ class ApiAuthService {
     };
   }
 
-  Future<Map<String, dynamic>> getUser(String token) async {
+  Future<Map<String, dynamic>> getUser() async {
     String url = "${dotenv.env['API_URL']}/User/show";
-    final http.Response response = await http.get(
+    final http.Response response = await Global.httpClient.get(
       Uri.parse(url),
       headers: {
-        'Authorization': 'Bearer $token',
         'Content-Type': "application/json",
       },
     );
@@ -68,12 +68,11 @@ class ApiAuthService {
     };
   }
 
-  Future<Map<String, dynamic>> getUserId(String token) async {
+  Future<Map<String, dynamic>> getUserId() async {
     String url = "${dotenv.env['API_URL']}/User/show";
-    final http.Response response = await http.get(
+    final http.Response response = await Global.httpClient.get(
       Uri.parse(url),
       headers: {
-        'Authorization': 'Bearer $token',
         'Content-Type': "application/json",
       },
     );

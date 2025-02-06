@@ -1,4 +1,5 @@
 import 'package:bubble_salmon/global/dependency_injection.dart';
+import 'package:bubble_salmon/global/navigator_observer.dart';
 import 'package:bubble_salmon/pages/account_page.dart';
 import 'package:bubble_salmon/pages/contact_page.dart';
 import 'package:bubble_salmon/pages/conversation_page.dart';
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorObservers: [AppNavigatorObserver()],
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       initialRoute: '/login',

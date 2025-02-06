@@ -11,17 +11,7 @@ class ContactRepository {
 
   Future<Map<String, dynamic>> getContacts() async {
     try {
-      String? token = await Global.getToken();
-      if (token == null) {
-        return {
-          "status": "error",
-          "message": "Token non trouvé",
-          "contacts": [],
-        };
-      }
-
-      Map<String, dynamic> response =
-          await apiContactService.getContacts(token);
+      Map<String, dynamic> response = await apiContactService.getContacts();
 
       if (response["statusCode"] != 200) {
         return {
