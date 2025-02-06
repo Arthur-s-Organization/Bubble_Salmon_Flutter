@@ -13,7 +13,6 @@ class ConversationRepository {
     try {
       Map<String, dynamic> response =
           await apiConversationService.conversationsPreview();
-
       if (response["statusCode"] != 200) {
         return {
           "status": "error",
@@ -22,10 +21,8 @@ class ConversationRepository {
           "conversations": [],
         };
       }
-
       final List<Conversation> conversations =
           Conversation.listFromJson(response["body"]);
-
       return {
         "status": "success",
         "message": "Conversations récupérées avec succès",
@@ -100,6 +97,33 @@ class ConversationRepository {
       return {
         "status": "error",
         "message": "Erreur lors de l'envoi du message : ${e.toString()}",
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> createGroup(
+      String name, List<String> recipientIds, String? base64Image) async {
+    try {
+      final response = await apiConversationService.createGroup(
+          name, recipientIds, base64Image);
+
+      if (response["statusCode"] != 200) {
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ??
+              "Erreur lors de la création du groupe",
+        };
+      }
+
+      return {
+        "status": "success",
+        "message": "Groupe créé avec succès",
+        "conversation": Conversation.fromJson(response["body"]),
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Erreur lors de la création du groupe : ${e.toString()}",
       };
     }
   }
