@@ -230,8 +230,33 @@ class _RegisterPageState extends State<RegisterPage> {
                         _isLoading
                             ? const CircularProgressIndicator()
                             : Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pushNamed(context, '/login'),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.arrow_back,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                        SizedBox(width: 4),
+                                        const Text(
+                                          "Retour",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
+                                    ),
+                                  ),
                                   ElevatedButton(
                                     onPressed: _register,
                                     style: ElevatedButton.styleFrom(
