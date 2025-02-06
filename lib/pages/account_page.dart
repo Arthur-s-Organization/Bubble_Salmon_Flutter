@@ -16,7 +16,8 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   final AuthRepository authRepository =
       AuthRepository(apiAuthService: ApiAuthService());
-  User? user;
+  User? _user;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -25,76 +26,81 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _loadUser() async {
-    Map<String, dynamic> response = await authRepository.getUser();
-    if (response["status"] == "success") {
-      setState(() {
-        user = User.fromJson(response["user"]);
-      });
-    }
+    final response = await authRepository.getUser();
+
+    setState(() {
+      _isLoading = false;
+      _user = response["user"];
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: user == null
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(32.0),
-                  width: double.infinity,
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Container(
-                          height: 80,
-                          width: 80,
-                          child: user!.imageFileName != null &&
-                                  user!.imageRepository != null
-                              ? Image.network(
-                                  Global.getImagePath(user!.imageRepository!,
-                                      user!.imageFileName!),
-                                  fit: BoxFit.cover,
-                                )
-                              : Image.asset(
-                                  "assets/img/placeholderColor.png",
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${user!.firstname} ${user!.lastname}',
-                        style: TextStyle(
-                            fontSize: 22,
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          : _user == null
+              ? const Center(
+                  child:
+                      Text("Erreur lors de la récupération des informations."))
+              : Column(
                   children: [
-                    _buildInfoRow('Téléphone', user!.phone),
-                    const SizedBox(height: 10),
-                    _buildInfoRow(
-                      'Date de naissance',
-                      Global.formatDate(user!.birthdate),
+                    Container(
+                      padding: const EdgeInsets.all(32.0),
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              child: _user!.imageFileName != null &&
+                                      _user!.imageRepository != null
+                                  ? Image.network(
+                                      Global.getImagePath(
+                                          _user!.imageRepository!,
+                                          _user!.imageFileName!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      "assets/img/placeholderColor.png",
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            '${_user!.firstname} ${_user!.lastname}',
+                            style: TextStyle(
+                                fontSize: 22,
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 10),
-                    _buildInfoRow('Nom d’utilisateur', user!.username),
-                    const SizedBox(height: 10),
-                    _buildInfoRow(
-                      'Date d’inscription',
-                      Global.formatDate(user!.createdAt),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow('Téléphone', _user!.phone),
+                        const SizedBox(height: 10),
+                        _buildInfoRow(
+                          'Date de naissance',
+                          Global.formatDate(_user!.birthdate),
+                        ),
+                        const SizedBox(height: 10),
+                        _buildInfoRow('Nom d’utilisateur', _user!.username),
+                        const SizedBox(height: 10),
+                        _buildInfoRow(
+                          'Date d’inscription',
+                          Global.formatDate(_user!.createdAt),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
       bottomNavigationBar: BottomBar(currentIndex: 2, context: context),
     );
   }

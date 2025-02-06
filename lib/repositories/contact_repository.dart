@@ -9,23 +9,41 @@ class ContactRepository {
     required this.apiContactService,
   });
 
-  Future<List<User>> getContacts() async {
+  Future<Map<String, dynamic>> getContacts() async {
     try {
       String? token = await Global.getToken();
       if (token == null) {
-        return [];
+        return {
+          "status": "error",
+          "message": "Token non trouvé",
+          "contacts": [],
+        };
       }
 
       Map<String, dynamic> response =
           await apiContactService.getContacts(token);
 
       if (response["statusCode"] != 200) {
-        return [];
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ?? "Erreur inconnue",
+          "contacts": [],
+        };
       }
 
-      return User.listFromJson(response["body"]);
+      final List<User> contacts = User.listFromJson(response["body"]);
+      return {
+        "status": "success",
+        "message": "Contacts récupérés",
+        "contacts": contacts,
+      };
     } catch (e) {
-      return [];
+      return {
+        "status": "error",
+        "message":
+            "Erreur lors de la récupération des contacts : ${e.toString()}",
+        "contacts": [],
+      };
     }
   }
 }

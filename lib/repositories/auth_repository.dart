@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/class/user.dart';
 import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -82,7 +83,11 @@ class AuthRepository {
     try {
       String? token = await Global.getToken();
       if (token == null) {
-        return {"status": "error", "message": "Utilisateur non connecté"};
+        return {
+          "status": "error",
+          "message": "Token non trouvé",
+          "user": null,
+        };
       }
 
       Map<String, dynamic> response = await apiAuthService.getUser(token);
@@ -90,19 +95,24 @@ class AuthRepository {
       if (response["statusCode"] != 200) {
         return {
           "status": "error",
-          "message": response["body"]["message"] ?? "Erreur inconnue",
+          "message": response["body"]["message"] ??
+              "Erreur lors de la récupération de l'utilisateur",
+          "user": null,
         };
       }
 
+      final User user = User.fromJson(response["body"]);
       return {
         "status": "success",
-        "user": response["body"],
+        "message": "Utilisateur récupéré avec succès",
+        "user": user,
       };
     } catch (e) {
       return {
         "status": "error",
         "message":
             "Erreur lors de la récupération de l'utilisateur : ${e.toString()}",
+        "user": null,
       };
     }
   }

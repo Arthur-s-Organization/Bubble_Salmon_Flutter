@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/class/conversation.dart';
 import 'package:bubble_salmon/class/message.dart';
 import 'package:bubble_salmon/services/conversation_service.dart';
 
@@ -16,15 +17,19 @@ class ConversationRepository {
       if (response["statusCode"] != 200) {
         return {
           "status": "error",
-          "message": response["body"]["message"] ?? "Erreur inconnue",
+          "message": response["body"]["message"] ??
+              "Erreur lors de la récupération des conversations",
           "conversations": [],
         };
       }
 
+      final List<Conversation> conversations =
+          Conversation.listFromJson(response["body"]);
+
       return {
         "status": "success",
-        "message": "Conversations récupérées",
-        "conversations": response["body"],
+        "message": "Conversations récupérées avec succès",
+        "conversations": conversations,
       };
     } catch (e) {
       return {
