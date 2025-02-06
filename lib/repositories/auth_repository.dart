@@ -79,6 +79,22 @@ class AuthRepository {
     }
   }
 
+  Future<Map<String, dynamic>> logout() async {
+    try {
+      await Global.clearToken();
+
+      return {
+        "status": "success",
+        "message": "Déconnexion réussie",
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Erreur lors de la déconnexion : ${e.toString()}",
+      };
+    }
+  }
+
   Future<Map<String, dynamic>> getUser() async {
     try {
       String? token = await Global.getToken();

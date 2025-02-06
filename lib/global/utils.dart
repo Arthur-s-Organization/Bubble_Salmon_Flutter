@@ -18,4 +18,9 @@ class Global {
     final FlutterSecureStorage storage = const FlutterSecureStorage();
     return await storage.read(key: "jwt_token");
   }
+
+  static Future<void> clearToken() async {
+    final FlutterSecureStorage storage = const FlutterSecureStorage();
+    await storage.delete(key: "jwt_token");
+  }
 }

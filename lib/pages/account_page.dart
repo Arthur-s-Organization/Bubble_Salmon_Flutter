@@ -34,6 +34,13 @@ class _AccountPageState extends State<AccountPage> {
     });
   }
 
+  Future<void> _logout() async {
+    await authRepository.logout();
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,6 +106,37 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 40),
+                    TextButton(
+                      onPressed: _logout,
+                      style: TextButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.tertiaryContainer,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.logout,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Déconnexion",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
       bottomNavigationBar: BottomBar(currentIndex: 2, context: context),
@@ -107,9 +145,7 @@ class _AccountPageState extends State<AccountPage> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4.0,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: RichText(
         text: TextSpan(
           text: '$label : ',
