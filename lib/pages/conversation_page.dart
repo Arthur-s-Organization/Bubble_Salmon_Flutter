@@ -116,7 +116,9 @@ class _ConversationPageState extends State<ConversationPage> {
     return GestureDetector(
       onTap: () => _focusNode.unfocus(),
       child: Scaffold(
-        appBar: const ConversationAppBar(),
+        appBar: ConversationAppBar(
+          conversationId: widget.conversationId,
+        ),
         body: Column(
           children: [
             Expanded(
