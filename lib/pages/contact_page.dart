@@ -1,7 +1,9 @@
 import 'package:bubble_salmon/class/user.dart';
 import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/repositories/contact_repository.dart';
+import 'package:bubble_salmon/repositories/conversation_repository.dart';
 import 'package:bubble_salmon/services/contact_service.dart';
+import 'package:bubble_salmon/services/conversation_service.dart';
 import 'package:bubble_salmon/widget/bottom_bar.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -146,8 +148,57 @@ class _ContactPageState extends State<ContactPage> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .secondary),
-                                    onTap: () {
-                                      // Action lors du clic sur un contact
+                                    onTap: () async {
+                                      // Montrer un indicateur de chargement
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (BuildContext context) {
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                            ),
+                                          );
+                                        },
+                                      );
+
+                                      final conversationRepository =
+                                          ConversationRepository(
+                                        apiConversationService:
+                                            ApiConversationService(),
+                                      );
+
+                                      final result =
+                                          await conversationRepository
+                                              .getOrCreateConversation(
+                                                  contact.id);
+
+                                      // Fermer l'indicateur de chargement
+                                      Navigator.pop(context);
+
+                                      if (result["status"] == "success") {
+                                        // Naviguer vers la page de conversation
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/conversation',
+                                          arguments: {
+                                            "conversationId":
+                                                result["conversationId"]
+                                                    .toString()
+                                          },
+                                        );
+                                      } else {
+                                        // Afficher une erreur
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(result["message"]),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
                                     },
                                   )),
                             );

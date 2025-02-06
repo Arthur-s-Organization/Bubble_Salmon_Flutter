@@ -127,4 +127,32 @@ class ConversationRepository {
       };
     }
   }
+
+  // Dans conversation_repository.dart
+  Future<Map<String, dynamic>> getOrCreateConversation(
+      String recipientId) async {
+    try {
+      final response =
+          await apiConversationService.getOrCreateConversation(recipientId);
+
+      if (response["statusCode"] != 200) {
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ??
+              "Erreur lors de la création de la conversation",
+        };
+      }
+
+      return {
+        "status": "success",
+        "message": "Conversation récupérée/créée avec succès",
+        "conversationId": response["body"]["id"],
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Erreur : ${e.toString()}",
+      };
+    }
+  }
 }
