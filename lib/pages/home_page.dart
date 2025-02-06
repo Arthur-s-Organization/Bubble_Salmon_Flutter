@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/class/conversation.dart';
 import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/repositories/conversation_repository.dart';
 import 'package:bubble_salmon/services/conversation_service.dart';
@@ -15,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<dynamic> _conversations = [];
+  List<Conversation> _conversations = [];
   bool _isLoading = true;
   String? _errorMessage;
   final ConversationRepository _conversationRepository =
@@ -32,7 +33,6 @@ class _HomePageState extends State<HomePage> {
 
     setState(() {
       _isLoading = false;
-
       if (response["status"] == "success") {
         _conversations = response["conversations"];
       } else {
@@ -46,50 +46,58 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: const CustomAppBar(),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator()) // Loader
-          : _conversations.isEmpty
-              ? const Center(
-                  // Placeholder si aucune conversation
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
                   child: Text(
-                    "Aucune conversation pour le moment.",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                    textAlign: TextAlign.center,
                   ),
                 )
-              : ListView.separated(
-                  padding: const EdgeInsets.only(top: 12),
-                  itemCount: _conversations.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: ActionBar(),
-                      );
-                    }
-                    final conversation = _conversations[index - 1];
-                    return InkWell(
-                      child: ConversationPreview(
-                        name:
-                            conversation["name"] ?? "Pas de nom pour l'instant",
-                        message: conversation["last_message"]?["text"] ??
-                            "Aucun message", // Get text from last_message
-                        time: Global.formatTime(DateTime.parse(
-                            conversation?["last_message"]["createdAt"] ??
-                                DateTime.now().toString())), // Parse createdAt
-                        imageFileName: conversation["image_filename"],
-                        imageRepository: conversation["image_repository"],
+              : _conversations.isEmpty
+                  ? const Center(
+                      child: Text(
+                        "Aucune conversation pour le moment.",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        '/conversation',
-                        arguments: {
-                          'conversationId': conversation["id"].toString()
-                        },
-                      ),
-                    );
-                  },
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 10),
-                ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.only(top: 12),
+                      itemCount: _conversations.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ActionBar(),
+                          );
+                        }
+                        final conversation = _conversations[index - 1];
+
+                        return InkWell(
+                          child: ConversationPreview(
+                            name: conversation.name,
+                            message: conversation.lastMessage?.text ??
+                                "Aucun message",
+                            time: Global.formatTime(
+                              conversation.lastMessage?.createdAt ??
+                                  conversation.createdAt,
+                            ),
+                            imageFileName: conversation.imageFileName,
+                            imageRepository: conversation.imageRepository,
+                          ),
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            '/conversation',
+                            arguments: {
+                              'conversationId': conversation.id,
+                            },
+                          ),
+                        );
+                      },
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 10),
+                    ),
       bottomNavigationBar: BottomBar(currentIndex: 1, context: context),
     );
   }

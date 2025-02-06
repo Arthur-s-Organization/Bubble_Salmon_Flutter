@@ -27,10 +27,10 @@ class _ContactPageState extends State<ContactPage> {
   }
 
   Future<void> _loadContacts() async {
-    final contacts = await _contactRepository.getContacts();
+    final response = await _contactRepository.getContacts();
     setState(() {
       _isLoading = false;
-      _contacts = contacts;
+      _contacts = response["contacts"];
     });
   }
 
