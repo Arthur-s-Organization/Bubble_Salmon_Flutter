@@ -27,7 +27,7 @@ class Conversation {
       imageFileName: json['imageFileName'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
-      lastMessage: json['last_message'] != null
+      lastMessage: json['last_message']['id'] != null
           ? Message.fromJson(json['last_message'])
           : null,
     );

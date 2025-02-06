@@ -28,13 +28,22 @@ class _MessageInputBarState extends State<MessageInputBar> {
   Future<void> _showImageSourceDialog() async {
     await showModalBottomSheet(
       context: context,
+      backgroundColor: Theme.of(context).colorScheme.tertiary,
       builder: (BuildContext context) {
         return SafeArea(
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Prendre une photo'),
+                leading: Icon(
+                  Icons.photo_camera,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: Text(
+                  'Prendre une photo',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   final XFile? photo =
@@ -47,8 +56,16 @@ class _MessageInputBarState extends State<MessageInputBar> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Choisir depuis la galerie'),
+                leading: Icon(
+                  Icons.photo_library,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: Text(
+                  'Choisir depuis la galerie',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 onTap: () async {
                   Navigator.pop(context);
                   final XFile? image =

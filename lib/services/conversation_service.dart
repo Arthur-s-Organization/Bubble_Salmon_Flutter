@@ -65,4 +65,32 @@ class ApiConversationService {
       "body": jsonDecode(response.body)
     };
   }
+
+  // Dans conversation_service.dart
+  Future<Map<String, dynamic>> createGroup(
+      String name, List<String> recipientIds, String? base64Image) async {
+    print(
+        "Creating group with name: $name, recipientIds: $recipientIds, image: $base64Image");
+    String url = "${dotenv.env['API_URL']}/Conversation/addGroup";
+    String? token = await Global.getToken();
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        "Authorization": "Bearer $token",
+        'Content-Type': "application/json",
+      },
+      body: jsonEncode({
+        "Name": name,
+        "RecipientIds": recipientIds,
+        if (base64Image != null) "Image": base64Image,
+        if (base64Image == null) "Image": null,
+      }),
+    );
+
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
 }
