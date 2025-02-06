@@ -1,14 +1,14 @@
 import 'dart:convert';
+import 'package:bubble_salmon/global/utils.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class ApiContactService {
-  Future<Map<String, dynamic>> getContacts(String token) async {
+  Future<Map<String, dynamic>> getContacts() async {
     String url = "${dotenv.env['API_URL']}/User/getAll";
-    final http.Response response = await http.get(
+    final http.Response response = await Global.httpClient.get(
       Uri.parse(url),
       headers: {
-        'Authorization': 'Bearer $token',
         'Content-Type': "application/json",
       },
     );

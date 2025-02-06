@@ -10,12 +10,10 @@ class ApiConversationService {
 
   Future<Map<String, dynamic>> conversationsPreview() async {
     String url = "${dotenv.env['API_URL']}/Conversation/getAll";
-    String? token = await Global.getToken();
 
-    final http.Response response = await http.get(
+    final http.Response response = await Global.httpClient.get(
       Uri.parse(url),
       headers: {
-        "Authorization": "Bearer $token",
         'Content-Type': "application/json",
       },
     );
@@ -27,12 +25,10 @@ class ApiConversationService {
 
   Future<Map<String, dynamic>> getMessages(String conversationId) async {
     String url = "${dotenv.env['API_URL']}/Message/getAll/$conversationId";
-    String? token = await Global.getToken();
 
-    final http.Response response = await http.get(
+    final http.Response response = await Global.httpClient.get(
       Uri.parse(url),
       headers: {
-        "Authorization": "Bearer $token",
         'Content-Type': "application/json",
       },
     );
@@ -45,12 +41,10 @@ class ApiConversationService {
   Future<Map<String, dynamic>> sendMessage(
       String conversationId, String? text, String? base64Image) async {
     String url = "${dotenv.env['API_URL']}/Message/Add";
-    String? token = await Global.getToken();
 
-    final response = await http.post(
+    final response = await Global.httpClient.post(
       Uri.parse(url),
       headers: {
-        "Authorization": "Bearer $token",
         'Content-Type': "application/json",
       },
       body: jsonEncode({
@@ -72,12 +66,10 @@ class ApiConversationService {
     print(
         "Creating group with name: $name, recipientIds: $recipientIds, image: $base64Image");
     String url = "${dotenv.env['API_URL']}/Conversation/addGroup";
-    String? token = await Global.getToken();
 
-    final response = await http.post(
+    final response = await Global.httpClient.post(
       Uri.parse(url),
       headers: {
-        "Authorization": "Bearer $token",
         'Content-Type': "application/json",
       },
       body: jsonEncode({
