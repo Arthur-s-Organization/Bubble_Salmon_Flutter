@@ -119,11 +119,11 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               decoration: InputDecoration(
                 labelText: 'Nom du groupe',
                 labelStyle: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.onTertiary,
                 ),
               ),
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.onTertiary,
               ),
             ),
             const SizedBox(height: 16),
@@ -154,7 +154,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               child: Text(
                 'Ajouter une image',
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Theme.of(context).colorScheme.onTertiary,
                 ),
               ),
             ),
@@ -173,7 +173,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                       title: Text(
                         user.username,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                       ),
                       value: isSelected,
@@ -187,6 +187,8 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                         });
                       },
                       activeColor: Theme.of(context).colorScheme.primary,
+                      checkColor: Colors.black,
+                      side: BorderSide(color: Colors.white70, width: 2),
                     );
                   },
                 ),
@@ -207,12 +209,17 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 ElevatedButton(
                   onPressed: _createGroup,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
-                  child: const Text('Créer',
+                  child: Text('Créer',
                       style: TextStyle(
-                        color: Colors.black,
-                      )),
+                          color: Theme.of(context).colorScheme.secondary)),
                 ),
               ],
             ),

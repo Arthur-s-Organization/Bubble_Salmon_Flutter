@@ -158,7 +158,7 @@ class _AccountPageState extends State<AccountPage> {
               text: value,
               style: const TextStyle(
                   fontSize: 16,
-                  color: Colors.white70,
+                  color: Colors.white,
                   fontWeight: FontWeight.normal),
             ),
           ],
