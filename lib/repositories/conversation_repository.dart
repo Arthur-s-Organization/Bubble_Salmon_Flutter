@@ -118,7 +118,6 @@ class ConversationRepository {
       return {
         "status": "success",
         "message": "Groupe créé avec succès",
-        "conversation": Conversation.fromJson(response["body"]),
       };
     } catch (e) {
       return {

@@ -2,6 +2,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:bubble_salmon/class/user.dart';
+import 'package:bubble_salmon/repositories/auth_repository.dart';
+import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:bubble_salmon/repositories/contact_repository.dart';
@@ -22,6 +24,8 @@ class CreateGroupDialog extends StatefulWidget {
 }
 
 class _CreateGroupDialogState extends State<CreateGroupDialog> {
+  final AuthRepository authRepository =
+      AuthRepository(apiAuthService: ApiAuthService());
   final TextEditingController _nameController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
@@ -36,12 +40,20 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   }
 
   Future<void> _loadContacts() async {
-    final result = await widget.contactRepository.getContacts();
-    if (result["status"] == "success") {
-      setState(() {
-        availableUsers = result["contacts"];
-        isLoading = false;
-      });
+    final userResponse = await authRepository.getUserId();
+
+    if (userResponse["status"] == "success") {
+      final int myUserId = userResponse["user"];
+
+      final result = await widget.contactRepository.getContacts();
+      if (result["status"] == "success") {
+        setState(() {
+          availableUsers = result["contacts"]
+              .where((user) => int.tryParse(user.id.toString()) != myUserId)
+              .toList();
+          isLoading = false;
+        });
+      }
     }
   }
 
