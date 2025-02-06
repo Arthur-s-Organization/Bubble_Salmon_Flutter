@@ -6,7 +6,8 @@ import 'package:bubble_salmon/widget/create_group_dialog.dart';
 import 'package:flutter/material.dart';
 
 class ActionBar extends StatelessWidget {
-  const ActionBar({super.key});
+  final Future<void> Function() loadConversations;
+  const ActionBar({super.key, required this.loadConversations});
 
   void _showConversationTypeDialog(BuildContext context) {
     showModalBottomSheet(
@@ -25,7 +26,7 @@ class ActionBar extends StatelessWidget {
                     fontFamily: 'FiraSans',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.onTertiary,
                   ),
                 ),
               ),
@@ -37,7 +38,7 @@ class ActionBar extends StatelessWidget {
                 title: Text(
                   'Individuel',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.onTertiary,
                   ),
                 ),
                 onTap: () {
@@ -53,7 +54,7 @@ class ActionBar extends StatelessWidget {
                 title: Text(
                   'En groupe',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.onTertiary,
                   ),
                 ),
                 onTap: () async {
@@ -70,7 +71,7 @@ class ActionBar extends StatelessWidget {
                     ),
                   );
                   if (result == true) {
-                    // Optionnel : Rafraîchir la liste des conversations
+                    await loadConversations();
                   }
                 },
               ),
@@ -84,47 +85,28 @@ class ActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.search,
-                    size: 32, color: Theme.of(context).colorScheme.secondary),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(Icons.add_circle_outline,
-                    size: 32, color: Theme.of(context).colorScheme.secondary),
-                onPressed: () =>
-                    _showConversationTypeDialog(context), // Modification ici
-              ),
-            ],
+          IconButton(
+            icon: Icon(Icons.search,
+                size: 28, color: Theme.of(context).colorScheme.secondary),
+            onPressed: () {},
           ),
-          Text(
-            'Bulles',
-            style: TextStyle(
-              fontFamily: 'FiraSans',
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
+          IconButton(
+            icon: Icon(Icons.add_circle,
+                size: 32, color: Theme.of(context).colorScheme.secondary),
+            onPressed: () => _showConversationTypeDialog(context),
           ),
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.swap_vert,
-                    size: 32, color: Theme.of(context).colorScheme.secondary),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: Icon(Icons.more_horiz,
-                    size: 32, color: Theme.of(context).colorScheme.secondary),
-                onPressed: () {},
-              ),
-            ],
+          IconButton(
+            icon: Icon(Icons.swap_vert,
+                size: 28, color: Theme.of(context).colorScheme.secondary),
+            onPressed: () {},
           ),
         ],
       ),

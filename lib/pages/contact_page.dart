@@ -47,21 +47,16 @@ class _ContactPageState extends State<ContactPage> {
               child: TextField(
                 decoration: InputDecoration(
                   hintText: "Rechercher...",
-                  hintStyle:
-                      TextStyle(color: Theme.of(context).colorScheme.secondary),
+                  hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onTertiary),
                   prefixIcon: Icon(
                     Icons.search,
                     color: Theme.of(context).colorScheme.secondary,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.secondary),
-                  ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.secondary),
+                        color: Theme.of(context).colorScheme.onTertiary),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -71,14 +66,6 @@ class _ContactPageState extends State<ContactPage> {
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text("Saumons",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.secondary)),
             ),
             Expanded(
               child: _isLoading
@@ -114,7 +101,8 @@ class _ContactPageState extends State<ContactPage> {
                                                 )
                                               : Container(
                                                   color: Theme.of(context)
-                                                      .primaryColor,
+                                                      .colorScheme
+                                                      .primary,
                                                   child: Center(
                                                     child: Text(
                                                       contact.firstname[0],
@@ -133,6 +121,7 @@ class _ContactPageState extends State<ContactPage> {
                                     title: Text(
                                       "${contact.firstname} ${contact.lastname}",
                                       style: TextStyle(
+                                          fontWeight: FontWeight.bold,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .primary),
@@ -140,9 +129,10 @@ class _ContactPageState extends State<ContactPage> {
                                     subtitle: Text(
                                       contact.phone,
                                       style: TextStyle(
+                                          fontSize: 12,
                                           color: Theme.of(context)
                                               .colorScheme
-                                              .secondary),
+                                              .onTertiaryContainer),
                                     ),
                                     trailing: Icon(Icons.arrow_forward,
                                         color: Theme.of(context)

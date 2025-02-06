@@ -67,9 +67,12 @@ class _HomePageState extends State<HomePage> {
                       itemCount: _conversations.length + 1,
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: ActionBar(),
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ActionBar(
+                              loadConversations: _loadConversations,
+                            ),
                           );
                         }
                         final conversation = _conversations[index - 1];
