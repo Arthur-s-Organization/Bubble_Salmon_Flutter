@@ -197,7 +197,10 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
-                  child: const Text('Créer'),
+                  child: const Text('Créer',
+                      style: TextStyle(
+                        color: Colors.black,
+                      )),
                 ),
               ],
             ),
