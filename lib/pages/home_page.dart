@@ -41,6 +41,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _toggleOrder() {
+    setState(() {
+      _conversations = _conversations.reversed.toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,6 +78,7 @@ class _HomePageState extends State<HomePage> {
                                 const EdgeInsets.symmetric(horizontal: 16.0),
                             child: ActionBar(
                               loadConversations: _loadConversations,
+                              toggleOrder: _toggleOrder,
                             ),
                           );
                         }
@@ -82,9 +89,8 @@ class _HomePageState extends State<HomePage> {
                             name: conversation.name,
                             message: conversation.lastMessage?.text ??
                                 "Aucun message",
-                            time: Global.formatTime(
-                              conversation.lastMessage?.createdAt ??
-                                  conversation.createdAt,
+                            time: Global.formatPreviewTime(
+                              conversation.updatedAt,
                             ),
                             imageFileName: conversation.imageFileName,
                             imageRepository: conversation.imageRepository,

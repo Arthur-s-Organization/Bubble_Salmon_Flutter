@@ -7,7 +7,13 @@ import 'package:flutter/material.dart';
 
 class ActionBar extends StatelessWidget {
   final Future<void> Function() loadConversations;
-  const ActionBar({super.key, required this.loadConversations});
+  final VoidCallback toggleOrder;
+
+  const ActionBar({
+    super.key,
+    required this.loadConversations,
+    required this.toggleOrder,
+  });
 
   void _showConversationTypeDialog(BuildContext context) {
     showModalBottomSheet(
@@ -58,7 +64,7 @@ class ActionBar extends StatelessWidget {
                   ),
                 ),
                 onTap: () async {
-                  Navigator.pop(context); // Ferme le bottom sheet
+                  Navigator.pop(context);
                   final result = await showDialog(
                     context: context,
                     builder: (context) => CreateGroupDialog(
@@ -106,7 +112,7 @@ class ActionBar extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.swap_vert,
                 size: 28, color: Theme.of(context).colorScheme.secondary),
-            onPressed: () {},
+            onPressed: toggleOrder,
           ),
         ],
       ),
