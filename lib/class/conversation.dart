@@ -8,6 +8,7 @@ class Conversation {
   final DateTime createdAt;
   final DateTime updatedAt;
   final Message? lastMessage;
+  final int type;
 
   Conversation({
     required this.id,
@@ -17,20 +18,22 @@ class Conversation {
     required this.createdAt,
     required this.updatedAt,
     this.lastMessage,
+    required this.type,
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
-      id: json['id'].toString(),
-      name: json['name'],
-      imageRepository: json['imageRepository'],
-      imageFileName: json['imageFileName'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      lastMessage: json['last_message']['id'] != null
-          ? Message.fromJson(json['last_message'])
-          : null,
-    );
+        id: json['id'].toString(),
+        name: json['name'],
+        imageRepository: json['imageRepository'],
+        imageFileName: json['imageFileName'],
+        createdAt: DateTime.parse(json['createdAt']),
+        updatedAt: DateTime.parse(json['updatedAt']),
+        lastMessage:
+            json['last_message'] != null && json['last_message']['id'] != null
+                ? Message.fromJson(json['last_message'])
+                : null,
+        type: json['type']);
   }
 
   static List<Conversation> listFromJson(List<dynamic> list) {

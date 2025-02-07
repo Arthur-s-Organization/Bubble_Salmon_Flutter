@@ -23,6 +23,23 @@ class ApiConversationService {
     };
   }
 
+  Future<Map<String, dynamic>> getConversationById(
+      String conversationId) async {
+    String url = "${dotenv.env['API_URL']}/Conversation/show/$conversationId";
+
+    final http.Response response = await Global.httpClient.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': "application/json",
+      },
+    );
+
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
+
   Future<Map<String, dynamic>> getMessages(String conversationId) async {
     String url = "${dotenv.env['API_URL']}/Message/getAll/$conversationId";
 

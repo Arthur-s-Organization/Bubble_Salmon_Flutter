@@ -23,6 +23,7 @@ class ConversationRepository {
       }
       final List<Conversation> conversations =
           Conversation.listFromJson(response["body"]);
+
       return {
         "status": "success",
         "message": "Conversations récupérées avec succès",
@@ -34,6 +35,37 @@ class ConversationRepository {
         "message":
             "Erreur lors de la récupération des conversations : ${e.toString()}",
         "conversations": [],
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getConversationById(
+      String conversationId) async {
+    try {
+      Map<String, dynamic> response =
+          await apiConversationService.getConversationById(conversationId);
+      if (response["statusCode"] != 200) {
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ??
+              "Erreur lors de la récupération de la conversation",
+          "conversation": null,
+        };
+      }
+
+      final Conversation conversation = Conversation.fromJson(response["body"]);
+
+      return {
+        "status": "success",
+        "message": "Conversation récupérée avec succès",
+        "conversation": conversation,
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message":
+            "Erreur lors de la récupération de la conversation : ${e.toString()}",
+        "conversations": null,
       };
     }
   }
