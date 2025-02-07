@@ -1,13 +1,12 @@
 import 'package:bubble_salmon/class/conversation.dart';
 import 'package:bubble_salmon/global/utils.dart';
-import 'package:bubble_salmon/repositories/conversation_repository.dart';
-import 'package:bubble_salmon/services/conversation_service.dart';
+
 import 'package:flutter/material.dart';
 
 class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final String conversationId;
+  final Conversation? conversation;
 
-  const ConversationAppBar({super.key, required this.conversationId});
+  const ConversationAppBar({super.key, required this.conversation});
 
   @override
   State<ConversationAppBar> createState() => _ConversationAppBarState();
@@ -17,33 +16,6 @@ class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ConversationAppBarState extends State<ConversationAppBar> {
-  final ConversationRepository _conversationRepository =
-      ConversationRepository(apiConversationService: ApiConversationService());
-
-  Conversation? _conversation;
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadConversation();
-  }
-
-  Future<void> _loadConversation() async {
-    final response = await _conversationRepository
-        .getConversationById(widget.conversationId);
-
-    setState(() {
-      _isLoading = false;
-      if (response["status"] == "success") {
-        _conversation = response["conversation"];
-      } else {
-        _errorMessage = response["message"];
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -79,11 +51,12 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
               child: Container(
                 height: 45,
                 width: 45,
-                child: _conversation?.imageFileName != null &&
-                        _conversation?.imageRepository != null
+                child: widget.conversation?.imageFileName != null &&
+                        widget.conversation?.imageRepository != null
                     ? Image.network(
-                        Global.getImagePath(_conversation!.imageRepository!,
-                            _conversation!.imageFileName!),
+                        Global.getImagePath(
+                            widget.conversation!.imageRepository!,
+                            widget.conversation!.imageFileName!),
                         fit: BoxFit.cover,
                       )
                     : Image.asset(
@@ -94,25 +67,17 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
             ),
             const SizedBox(width: 20),
             Flexible(
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : Text(
-                      _conversation?.name ?? "Conversation inconnue",
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontFamily: 'FiraSans',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+              child: Text(
+                widget.conversation?.name ?? "Conversation inconnue",
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: TextStyle(
+                  fontFamily: 'FiraSans',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
           ],
         ),

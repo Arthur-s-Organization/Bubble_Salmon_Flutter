@@ -23,6 +23,7 @@ class ConversationRepository {
       }
       final List<Conversation> conversations =
           Conversation.listFromJson(response["body"]);
+
       return {
         "status": "success",
         "message": "Conversations récupérées avec succès",
@@ -52,7 +53,6 @@ class ConversationRepository {
         };
       }
 
-      print(response["body"]);
       final Conversation conversation = Conversation.fromJson(response["body"]);
 
       return {

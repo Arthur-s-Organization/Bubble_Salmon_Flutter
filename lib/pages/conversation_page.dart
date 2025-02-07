@@ -1,3 +1,4 @@
+import 'package:bubble_salmon/class/conversation.dart';
 import 'package:bubble_salmon/class/message.dart';
 import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/repositories/auth_repository.dart';
@@ -30,6 +31,7 @@ class _ConversationPageState extends State<ConversationPage> {
   final ScrollController _scrollController =
       ScrollController(); // Add ScrollController
   List<Message> _messages = [];
+  Conversation? _conversation;
   String? currentUserId;
   bool _isLoading = false;
   bool _isInitialLoad = true;
@@ -39,6 +41,7 @@ class _ConversationPageState extends State<ConversationPage> {
     super.initState();
     _initializeUser();
     _loadMessages();
+    _loadConversation();
     _refreshTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _loadMessages();
     });
@@ -111,13 +114,25 @@ class _ConversationPageState extends State<ConversationPage> {
     }
   }
 
+  Future<void> _loadConversation() async {
+    final response = await widget.conversationRepository
+        .getConversationById(widget.conversationId);
+
+    setState(() {
+      _isLoading = false;
+      if (response["status"] == "success") {
+        _conversation = response["conversation"];
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _focusNode.unfocus(),
       child: Scaffold(
         appBar: ConversationAppBar(
-          conversationId: widget.conversationId,
+          conversation: _conversation,
         ),
         body: Column(
           children: [
@@ -140,6 +155,8 @@ class _ConversationPageState extends State<ConversationPage> {
                         ? Global.getImagePath(
                             message.imageRepository!, message.imageFileName!)
                         : null,
+                    senderName: message.username,
+                    isGroupe: _conversation?.type == 3,
                   );
                 },
               ),

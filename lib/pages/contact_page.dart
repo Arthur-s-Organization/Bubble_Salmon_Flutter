@@ -119,7 +119,7 @@ class _ContactPageState extends State<ContactPage> {
                                                 )),
                                     ),
                                     title: Text(
-                                      "${contact.firstname} ${contact.lastname}",
+                                      contact.username,
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Theme.of(context)
