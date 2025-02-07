@@ -82,9 +82,8 @@ class _HomePageState extends State<HomePage> {
                             name: conversation.name,
                             message: conversation.lastMessage?.text ??
                                 "Aucun message",
-                            time: Global.formatTime(
-                              conversation.lastMessage?.createdAt ??
-                                  conversation.createdAt,
+                            time: Global.formatPreviewTime(
+                              conversation.updatedAt,
                             ),
                             imageFileName: conversation.imageFileName,
                             imageRepository: conversation.imageRepository,
