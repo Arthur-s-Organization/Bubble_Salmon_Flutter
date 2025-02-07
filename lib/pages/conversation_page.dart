@@ -137,30 +137,53 @@ class _ConversationPageState extends State<ConversationPage> {
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController, // Add controller to ListView
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  return MessageBubble(
-                    message: message.text ?? '',
-                    time: Global.formatTime(
-                        DateTime.parse(message.createdAt.toString())),
-                    messageType: message.messageType,
-                    bubbleType: message.userId == currentUserId
-                        ? BubbleType.sender
-                        : BubbleType.receiver,
-                    imageUrl: message.imageRepository != null &&
-                            message.imageFileName != null
-                        ? Global.getImagePath(
-                            message.imageRepository!, message.imageFileName!)
-                        : null,
-                    senderName: message.username,
-                    isGroupe: _conversation?.type == 3,
-                  );
-                },
-              ),
-            ),
+                child: ListView.builder(
+              controller: _scrollController,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                final messageDate =
+                    DateTime.parse(message.createdAt.toString());
+
+                bool showDateSeparator = index == 0 ||
+                    DateTime.parse(_messages[index - 1].createdAt.toString())
+                            .day !=
+                        messageDate.day;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (showDateSeparator)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          Global.formatDate(messageDate),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    MessageBubble(
+                      message: message.text ?? '',
+                      time: Global.formatTime(messageDate),
+                      messageType: message.messageType,
+                      bubbleType: message.userId == currentUserId
+                          ? BubbleType.sender
+                          : BubbleType.receiver,
+                      imageUrl: message.imageRepository != null &&
+                              message.imageFileName != null
+                          ? Global.getImagePath(
+                              message.imageRepository!, message.imageFileName!)
+                          : null,
+                      senderName: message.username,
+                      isGroupe: _conversation?.type == 3,
+                    ),
+                  ],
+                );
+              },
+            )),
             MessageInputBar(
               focusNode: _focusNode,
               onSendMessage: (text, base64Image) async {

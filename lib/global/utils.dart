@@ -6,7 +6,11 @@ import 'package:intl/intl.dart';
 
 class Global {
   static String formatTime(DateTime dateTime) {
-    return "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+    return DateFormat('HH:mm').format(dateTime);
+  }
+
+  static String formatDate(DateTime date) {
+    return DateFormat('dd/MM/yyyy').format(date);
   }
 
   static String formatPreviewTime(DateTime dateTime) {
@@ -16,18 +20,14 @@ class Global {
         now.day == dateTime.day;
 
     if (isToday) {
-      return DateFormat('HH:mm').format(dateTime);
+      return formatTime(dateTime);
     } else {
-      return DateFormat('dd/MM/yyyy').format(dateTime);
+      return formatDate(dateTime);
     }
   }
 
-  static String formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-  }
-
   static String getImagePath(String imageRepository, String imageFileName) {
-    return '${dotenv.env['API_URL']}/uploads/images/${imageRepository}/${imageFileName}';
+    return '${dotenv.env['API_URL']}/uploads/images/$imageRepository/$imageFileName';
   }
 
   static Future<String?> getToken() async {
