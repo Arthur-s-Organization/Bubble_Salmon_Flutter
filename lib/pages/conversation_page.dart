@@ -28,8 +28,7 @@ class ConversationPage extends StatefulWidget {
 class _ConversationPageState extends State<ConversationPage> {
   Timer? _refreshTimer;
   final FocusNode _focusNode = FocusNode();
-  final ScrollController _scrollController =
-      ScrollController(); // Add ScrollController
+  final ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
   Conversation? _conversation;
   String? currentUserId;
@@ -51,7 +50,7 @@ class _ConversationPageState extends State<ConversationPage> {
   void dispose() {
     _refreshTimer?.cancel();
     _focusNode.dispose();
-    _scrollController.dispose(); // Dispose ScrollController
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -88,12 +87,10 @@ class _ConversationPageState extends State<ConversationPage> {
                 (Message a, Message b) => a.createdAt.compareTo(b.createdAt));
         });
 
-        // On ne scrolle que lors du chargement initial
         if (_isInitialLoad) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToBottom();
-            _isInitialLoad =
-                false; // On marque le chargement initial comme terminé
+            _isInitialLoad = false;
           });
         }
       }
@@ -103,7 +100,6 @@ class _ConversationPageState extends State<ConversationPage> {
   }
 
   Future<void> _handleSendMessage(String? text, String? base64Image) async {
-    // Vérifier qu'au moins l'un des deux paramètres est non null
     if (text == null && base64Image == null) return;
 
     final result = await widget.conversationRepository
@@ -128,69 +124,80 @@ class _ConversationPageState extends State<ConversationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _focusNode.unfocus(),
-      child: Scaffold(
-        appBar: ConversationAppBar(
-          conversation: _conversation,
-        ),
-        body: Column(
-          children: [
-            Expanded(
-                child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                final messageDate =
-                    DateTime.parse(message.createdAt.toString());
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pop(context, true);
+        }
+      },
+      child: GestureDetector(
+        onTap: () => _focusNode.unfocus(),
+        child: Scaffold(
+          appBar: ConversationAppBar(
+            conversation: _conversation,
+            onConversationUpdated: () {
+              _loadConversation();
+            },
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                  child: ListView.builder(
+                controller: _scrollController,
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  final messageDate =
+                      DateTime.parse(message.createdAt.toString());
 
-                bool showDateSeparator = index == 0 ||
-                    DateTime.parse(_messages[index - 1].createdAt.toString())
-                            .day !=
-                        messageDate.day;
+                  bool showDateSeparator = index == 0 ||
+                      DateTime.parse(_messages[index - 1].createdAt.toString())
+                              .day !=
+                          messageDate.day;
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (showDateSeparator)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          Global.formatDate(messageDate),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (showDateSeparator)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            Global.formatDate(messageDate),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
+                      MessageBubble(
+                        message: message.text ?? '',
+                        time: Global.formatTime(messageDate),
+                        messageType: message.messageType,
+                        bubbleType: message.userId == currentUserId
+                            ? BubbleType.sender
+                            : BubbleType.receiver,
+                        imageUrl: message.imageRepository != null &&
+                                message.imageFileName != null
+                            ? Global.getImagePath(message.imageRepository!,
+                                message.imageFileName!)
+                            : null,
+                        senderName: message.username,
+                        isGroupe: _conversation?.type == 3,
                       ),
-                    MessageBubble(
-                      message: message.text ?? '',
-                      time: Global.formatTime(messageDate),
-                      messageType: message.messageType,
-                      bubbleType: message.userId == currentUserId
-                          ? BubbleType.sender
-                          : BubbleType.receiver,
-                      imageUrl: message.imageRepository != null &&
-                              message.imageFileName != null
-                          ? Global.getImagePath(
-                              message.imageRepository!, message.imageFileName!)
-                          : null,
-                      senderName: message.username,
-                      isGroupe: _conversation?.type == 3,
-                    ),
-                  ],
-                );
-              },
-            )),
-            MessageInputBar(
-              focusNode: _focusNode,
-              onSendMessage: (text, base64Image) async {
-                await _handleSendMessage(text, base64Image);
-              },
-            ),
-          ],
+                    ],
+                  );
+                },
+              )),
+              MessageInputBar(
+                focusNode: _focusNode,
+                onSendMessage: (text, base64Image) async {
+                  await _handleSendMessage(text, base64Image);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

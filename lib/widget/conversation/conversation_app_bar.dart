@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 
 class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Conversation? conversation;
+  final Function()? onConversationUpdated;
 
-  const ConversationAppBar({super.key, required this.conversation});
+  const ConversationAppBar({
+    super.key,
+    required this.conversation,
+    this.onConversationUpdated,
+  });
 
   @override
   State<ConversationAppBar> createState() => _ConversationAppBarState();
@@ -17,16 +22,20 @@ class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ConversationAppBarState extends State<ConversationAppBar> {
-  void _openGroupSettingsModal() {
+  Future<void> _openGroupSettingsModal() async {
     if (widget.conversation == null) return;
 
-    showModalBottomSheet(
+    final result = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       builder: (context) {
         return GroupSettingsModal(conversation: widget.conversation!);
       },
     );
+
+    if (result == true && widget.onConversationUpdated != null) {
+      widget.onConversationUpdated!();
+    }
   }
 
   @override
@@ -41,7 +50,7 @@ class _ConversationAppBarState extends State<ConversationAppBar> {
           color: Theme.of(context).colorScheme.secondary,
         ),
         onPressed: () {
-          Navigator.pop(context);
+          Navigator.pop(context, true);
         },
       ),
       title: Row(

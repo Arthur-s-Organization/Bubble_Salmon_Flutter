@@ -66,7 +66,7 @@ class _GroupSettingsModalState extends State<GroupSettingsModal> {
         backgroundColor: Colors.red,
       ));
     } else {
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     }
   }
 
