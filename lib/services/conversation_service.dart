@@ -121,4 +121,25 @@ class ApiConversationService {
       "body": jsonDecode(response.body)
     };
   }
+
+  Future<Map<String, dynamic>> updateGroup(
+      String conversationId, String? name, String? base64Image) async {
+    String url = "${dotenv.env['API_URL']}/Conversation/update/$conversationId";
+
+    final response = await Global.httpClient.put(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': "application/json",
+      },
+      body: jsonEncode({
+        if (name != null) "Name": name,
+        if (base64Image != null) "Image": base64Image,
+      }),
+    );
+
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
 }

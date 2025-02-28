@@ -1,5 +1,6 @@
 import 'package:bubble_salmon/class/conversation.dart';
 import 'package:bubble_salmon/global/utils.dart';
+import 'package:bubble_salmon/widget/conversation/group_setting_modale.dart';
 
 import 'package:flutter/material.dart';
 
@@ -16,72 +17,77 @@ class ConversationAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _ConversationAppBarState extends State<ConversationAppBar> {
+  void _openGroupSettingsModal() {
+    if (widget.conversation == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return GroupSettingsModal(conversation: widget.conversation!);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
       elevation: 0,
       scrolledUnderElevation: 0,
-      leading: Transform.translate(
-        offset: const Offset(
-            -5, -5), // ✅ Réduction de l’espace entre la flèche et l’image
-        child: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Theme.of(context).colorScheme.secondary,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+      leading: IconButton(
+        icon: Icon(
+          Icons.arrow_back_ios,
+          color: Theme.of(context).colorScheme.secondary,
         ),
-      ),
-      title: GestureDetector(
-        onTap: () {
-          if (ModalRoute.of(context)?.settings.name == '/conversation') {
-            return;
-          } else {
-            Navigator.pushNamed(context, '/conversation');
-          }
+        onPressed: () {
+          Navigator.pop(context);
         },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Container(
-                height: 45,
-                width: 45,
-                child: widget.conversation?.imageFileName != null &&
-                        widget.conversation?.imageRepository != null
-                    ? Image.network(
-                        Global.getImagePath(
-                            widget.conversation!.imageRepository!,
-                            widget.conversation!.imageFileName!),
-                        fit: BoxFit.cover,
-                      )
-                    : Image.asset(
-                        "assets/img/placeholderColor.png",
-                        fit: BoxFit.cover,
-                      ),
-              ),
-            ),
-            const SizedBox(width: 20),
-            Flexible(
-              child: Text(
-                widget.conversation?.name ?? "Conversation inconnue",
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: TextStyle(
-                  fontFamily: 'FiraSans',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
+      title: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: Container(
+              height: 45,
+              width: 45,
+              child: widget.conversation?.imageFileName != null &&
+                      widget.conversation?.imageRepository != null
+                  ? Image.network(
+                      Global.getImagePath(widget.conversation!.imageRepository!,
+                          widget.conversation!.imageFileName!),
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      "assets/img/placeholderColor.png",
+                      fit: BoxFit.cover,
+                    ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          Flexible(
+            child: Text(
+              widget.conversation?.name ?? "Conversation inconnue",
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: TextStyle(
+                fontFamily: 'FiraSans',
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (widget.conversation?.type == 3)
+          IconButton(
+            icon: Icon(Icons.more_vert,
+                color: Theme.of(context).colorScheme.secondary),
+            onPressed: _openGroupSettingsModal,
+          ),
+      ],
       toolbarHeight: 78,
     );
   }
