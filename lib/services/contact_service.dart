@@ -18,4 +18,21 @@ class ApiContactService {
       "body": jsonDecode(response.body)
     };
   }
+
+  Future<Map<String, dynamic>> searchContacts(String searchTerm) async {
+    String url = "${dotenv.env['API_URL']}/User/search?filter=$searchTerm";
+    final http.Response response = await Global.httpClient.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': "application/json",
+      },
+    );
+    print("searchterm : $searchTerm");
+    print("response.body : ${response.body}");
+
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
 }
