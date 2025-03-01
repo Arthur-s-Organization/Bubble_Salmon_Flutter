@@ -17,8 +17,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Conversation> _conversations = [];
+  List<Conversation> _filteredConversations = [];
   bool _isLoading = true;
+  bool _isSearching = false;
   String? _errorMessage;
+  final TextEditingController _searchController = TextEditingController();
   final ConversationRepository _conversationRepository =
       ConversationRepository(apiConversationService: ApiConversationService());
 
@@ -27,11 +30,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadConversations();
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -39,6 +45,42 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _loadConversations();
+    }
+  }
+
+  void _onSearchChanged() {
+    if (_searchController.text.isEmpty) {
+      setState(() {
+        _filteredConversations = _conversations;
+      });
+    } else if (_searchController.text.isNotEmpty) {
+      _performSearch(_searchController.text);
+    }
+  }
+
+  Future<void> _performSearch(String query) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _conversationRepository.searchConversations(query);
+
+      setState(() {
+        _isLoading = false;
+        if (response["status"] == "success") {
+          _filteredConversations = response["conversations"];
+        } else {
+          _errorMessage = response["message"];
+          _filteredConversations = [];
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Erreur lors de la recherche: ${e.toString()}";
+        _filteredConversations = [];
+      });
     }
   }
 
@@ -53,6 +95,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _isLoading = false;
       if (response["status"] == "success") {
         _conversations = response["conversations"];
+        _filteredConversations = _conversations;
       } else {
         _errorMessage = response["message"];
       }
@@ -62,6 +105,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void _toggleOrder() {
     setState(() {
       _conversations = _conversations.reversed.toList();
+      if (!_isSearching || _searchController.text.isEmpty) {
+        _filteredConversations = _conversations;
+      }
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        _filteredConversations = _conversations;
+      }
     });
   }
 
@@ -79,58 +135,95 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     textAlign: TextAlign.center,
                   ),
                 )
-              : _conversations.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "Aucune conversation pour le moment.",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.only(top: 12),
-                      itemCount: _conversations.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: ActionBar(
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12.0),
+                      child: _isSearching
+                          ? TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                hintText: 'Rechercher une conversation...',
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                prefixIcon: const Icon(Icons.search,
+                                    color: Colors.grey),
+                                suffixIcon: IconButton(
+                                  icon: const Icon(Icons.close,
+                                      color: Colors.grey),
+                                  onPressed: _toggleSearch,
+                                ),
+                                filled: true,
+                                fillColor: Theme.of(context)
+                                    .colorScheme
+                                    .tertiaryContainer,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                              style: const TextStyle(color: Colors.white),
+                            )
+                          : ActionBar(
                               loadConversations: _loadConversations,
                               toggleOrder: _toggleOrder,
+                              toggleSearch: _toggleSearch,
                             ),
-                          );
-                        }
-                        final conversation = _conversations[index - 1];
-
-                        return InkWell(
-                          child: ConversationPreview(
-                            name: conversation.name,
-                            message: conversation.lastMessage?.text ??
-                                "Aucun message",
-                            time: Global.formatPreviewTime(
-                              conversation.updatedAt,
-                            ),
-                            imageFileName: conversation.imageFileName,
-                            imageRepository: conversation.imageRepository,
-                          ),
-                          onTap: () async {
-                            final result = await Navigator.pushNamed(
-                              context,
-                              '/conversation',
-                              arguments: {
-                                'conversationId': conversation.id,
-                              },
-                            );
-
-                            if (result == true) {
-                              _loadConversations();
-                            }
-                          },
-                        );
-                      },
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 10),
                     ),
+                    Expanded(
+                      child: _filteredConversations.isEmpty
+                          ? Center(
+                              child: Text(
+                                _isSearching &&
+                                        _searchController.text.isNotEmpty
+                                    ? "Aucune conversation trouvée pour votre recherche."
+                                    : "Aucune conversation pour le moment.",
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.only(top: 12),
+                              itemCount: _filteredConversations.length,
+                              itemBuilder: (context, index) {
+                                final conversation =
+                                    _filteredConversations[index];
+                                return InkWell(
+                                  child: ConversationPreview(
+                                    name: conversation.name,
+                                    message: conversation.lastMessage?.text ??
+                                        "Aucun message",
+                                    time: Global.formatPreviewTime(
+                                      conversation.updatedAt,
+                                    ),
+                                    imageFileName: conversation.imageFileName,
+                                    imageRepository:
+                                        conversation.imageRepository,
+                                  ),
+                                  onTap: () async {
+                                    final result = await Navigator.pushNamed(
+                                      context,
+                                      '/conversation',
+                                      arguments: {
+                                        'conversationId': conversation.id,
+                                      },
+                                    );
+
+                                    if (result == true) {
+                                      _loadConversations();
+                                    }
+                                  },
+                                );
+                              },
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: 10),
+                            ),
+                    ),
+                  ],
+                ),
       bottomNavigationBar: BottomBar(currentIndex: 1, context: context),
     );
   }
