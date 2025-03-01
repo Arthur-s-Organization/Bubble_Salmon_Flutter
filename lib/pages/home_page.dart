@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Conversation> _conversations = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -25,10 +25,28 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadConversations();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadConversations();
+    }
+  }
+
   Future<void> _loadConversations() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     final response = await _conversationRepository.conversationsPreview();
 
     setState(() {
@@ -95,13 +113,19 @@ class _HomePageState extends State<HomePage> {
                             imageFileName: conversation.imageFileName,
                             imageRepository: conversation.imageRepository,
                           ),
-                          onTap: () => Navigator.pushNamed(
-                            context,
-                            '/conversation',
-                            arguments: {
-                              'conversationId': conversation.id,
-                            },
-                          ),
+                          onTap: () async {
+                            final result = await Navigator.pushNamed(
+                              context,
+                              '/conversation',
+                              arguments: {
+                                'conversationId': conversation.id,
+                              },
+                            );
+
+                            if (result == true) {
+                              _loadConversations();
+                            }
+                          },
                         );
                       },
                       separatorBuilder: (context, index) =>

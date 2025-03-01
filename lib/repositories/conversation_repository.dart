@@ -186,4 +186,18 @@ class ConversationRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> updateGroup(
+      String conversationId, String? name, String? base64Image) async {
+    try {
+      final response = await apiConversationService.updateGroup(
+          conversationId, name, base64Image);
+      return response;
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Erreur lors de la mise à jour du groupe : ${e.toString()}",
+      };
+    }
+  }
 }
