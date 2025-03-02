@@ -36,4 +36,32 @@ class ContactRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> searchContacts(String searchTerm) async {
+    try {
+      Map<String, dynamic> response =
+          await apiContactService.searchContacts(searchTerm);
+
+      if (response["statusCode"] != 200) {
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ?? "Erreur inconnue",
+          "contacts": [],
+        };
+      }
+
+      final List<User> contacts = User.listFromJson(response["body"]);
+      return {
+        "status": "success",
+        "message": "Contacts filtrés récupérés",
+        "contacts": contacts,
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message": "Erreur lors de la recherche des contacts : ${e.toString()}",
+        "contacts": [],
+      };
+    }
+  }
 }
