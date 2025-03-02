@@ -110,7 +110,11 @@ class _ContactPageState extends State<ContactPage> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _contacts.isEmpty
-                      ? const Center(child: Text("Aucun contact trouvé."))
+                      ? const Center(
+                          child: Text(
+                          "Aucun contact trouvé.",
+                          style: TextStyle(color: Colors.white),
+                        ))
                       : ListView.builder(
                           padding: const EdgeInsets.all(8.0),
                           itemCount: contactsByInitial.keys.length +
