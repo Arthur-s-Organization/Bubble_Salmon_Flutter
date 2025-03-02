@@ -142,4 +142,19 @@ class ApiConversationService {
       "body": jsonDecode(response.body)
     };
   }
+
+  Future<Map<String, dynamic>> searchConversations(String query) async {
+    String url = "${dotenv.env['API_URL']}/Conversation/search/$query";
+
+    final http.Response response = await Global.httpClient.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': "application/json",
+      },
+    );
+    return {
+      "statusCode": response.statusCode,
+      "body": jsonDecode(response.body)
+    };
+  }
 }

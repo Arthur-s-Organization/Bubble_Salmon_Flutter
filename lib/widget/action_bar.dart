@@ -8,11 +8,13 @@ import 'package:flutter/material.dart';
 class ActionBar extends StatelessWidget {
   final Future<void> Function() loadConversations;
   final VoidCallback toggleOrder;
+  final VoidCallback toggleSearch;
 
   const ActionBar({
     super.key,
     required this.loadConversations,
     required this.toggleOrder,
+    required this.toggleSearch,
   });
 
   void _showConversationTypeDialog(BuildContext context) {
@@ -102,7 +104,7 @@ class ActionBar extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.search,
                 size: 28, color: Theme.of(context).colorScheme.secondary),
-            onPressed: () {},
+            onPressed: toggleSearch,
           ),
           IconButton(
             icon: Icon(Icons.add_circle,

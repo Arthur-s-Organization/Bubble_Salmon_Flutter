@@ -200,4 +200,34 @@ class ConversationRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> searchConversations(String query) async {
+    try {
+      Map<String, dynamic> response =
+          await apiConversationService.searchConversations(query);
+      if (response["statusCode"] != 200) {
+        return {
+          "status": "error",
+          "message": response["body"]["message"] ??
+              "Erreur lors de la recherche des conversations",
+          "conversations": [],
+        };
+      }
+      final List<Conversation> conversations =
+          Conversation.listFromJson(response["body"]);
+
+      return {
+        "status": "success",
+        "message": "Conversations trouvées avec succès",
+        "conversations": conversations,
+      };
+    } catch (e) {
+      return {
+        "status": "error",
+        "message":
+            "Erreur lors de la recherche des conversations : ${e.toString()}",
+        "conversations": [],
+      };
+    }
+  }
 }
