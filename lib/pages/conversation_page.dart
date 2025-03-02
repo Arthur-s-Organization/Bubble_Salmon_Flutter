@@ -5,12 +5,10 @@ import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/repositories/conversation_repository.dart';
 import 'package:bubble_salmon/widget/conversation/conversation_app_bar.dart';
 import 'package:bubble_salmon/widget/conversation/message_bubble.dart';
-// Import the MessageInputBar widget
 import 'package:bubble_salmon/widget/conversation/message_input_bar.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-// Extension pour éviter la duplication de code
 extension MessageListComparison on List<Message> {
   bool hasChanged(List<Message> other) {
     if (length != other.length) return true;
@@ -50,11 +48,9 @@ class _ConversationPageState extends State<ConversationPage> {
   bool _isInitialLoad = true;
   final FocusNode _messageFocusNode = FocusNode();
 
-  // StreamController pour gérer les mises à jour des messages
   final StreamController<List<Message>> _messagesStreamController =
       StreamController<List<Message>>.broadcast();
 
-  // Timer pour le rafraîchissement périodique
   Timer? _refreshTimer;
 
   @override
@@ -64,7 +60,6 @@ class _ConversationPageState extends State<ConversationPage> {
     _loadConversation();
     _initialLoadMessages();
 
-    // Configurer le timer pour mettre à jour uniquement le stream
     _refreshTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _refreshMessages();
     });
@@ -88,7 +83,6 @@ class _ConversationPageState extends State<ConversationPage> {
     }
   }
 
-  // Chargement initial des messages (avec setState)
   Future<void> _initialLoadMessages() async {
     if (_isLoading) return;
 
@@ -119,7 +113,6 @@ class _ConversationPageState extends State<ConversationPage> {
     }
   }
 
-  // Rafraîchissement des messages (sans setState, uniquement via stream)
   Future<void> _refreshMessages() async {
     if (_isLoading) return;
 
@@ -131,13 +124,11 @@ class _ConversationPageState extends State<ConversationPage> {
         final newMessages = List<Message>.from(result["messages"])
           ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-        // Vérifier si les messages ont changé
         if (_messages.hasChanged(newMessages)) {
           _messages = newMessages;
-          // Mettre à jour uniquement le stream, pas l'état
+
           _messagesStreamController.add(newMessages);
 
-          // Si de nouveaux messages sont arrivés, défiler vers le bas
           if (newMessages.length > _messages.length) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _scrollToBottom();
@@ -189,7 +180,6 @@ class _ConversationPageState extends State<ConversationPage> {
         ),
         body: Column(
           children: [
-            // Zone des messages qui sera mise à jour par le stream
             Expanded(
               child: StreamBuilder<List<Message>>(
                 stream: _messagesStreamController.stream,
@@ -247,7 +237,6 @@ class _ConversationPageState extends State<ConversationPage> {
                 },
               ),
             ),
-            // Remplacer CustomInputBar par MessageInputBar
             MessageInputBar(
               onSendMessage: (text, base64Image) async {
                 await _handleSendMessage(text, base64Image);
@@ -266,7 +255,6 @@ class _ConversationPageState extends State<ConversationPage> {
     final result = await widget.conversationRepository
         .sendMessage(widget.conversationId, text, base64Image);
     if (result["status"] == "success") {
-      // Forcer un rafraîchissement immédiat
       await _refreshMessages();
       _scrollToBottom();
     }

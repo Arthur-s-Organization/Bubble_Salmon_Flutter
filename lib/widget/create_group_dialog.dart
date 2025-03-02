@@ -1,4 +1,3 @@
-// Nouveau fichier : create_group_dialog.dart
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:bubble_salmon/class/user.dart';

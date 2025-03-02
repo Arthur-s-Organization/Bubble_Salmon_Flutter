@@ -77,7 +77,6 @@ class ApiConversationService {
     };
   }
 
-  // Dans conversation_service.dart
   Future<Map<String, dynamic>> createGroup(
       String name, List<String> recipientIds, String? base64Image) async {
     String url = "${dotenv.env['API_URL']}/Conversation/addGroup";
@@ -101,7 +100,6 @@ class ApiConversationService {
     };
   }
 
-  // Dans conversation_service.dart
   Future<Map<String, dynamic>> getOrCreateConversation(
       String recipientId) async {
     String url = "${dotenv.env['API_URL']}/Conversation/getOrCreate";

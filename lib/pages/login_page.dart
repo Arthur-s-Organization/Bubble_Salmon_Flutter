@@ -65,7 +65,6 @@ class _LoginPageState extends State<LoginPage> {
         body: SafeArea(
           child: Column(
             children: [
-              // AppBar personnalisé
               const CustomAppBar(),
               Expanded(
                 child: SingleChildScrollView(
@@ -75,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 32),
-                        // Message d'introduction
                         RichText(
                           textAlign: TextAlign.center,
                           text: TextSpan(
@@ -102,7 +100,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        // Champ Nom d'utilisateur
                         Container(
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
@@ -125,7 +122,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Champ Mot de passe
                         Container(
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
@@ -149,7 +145,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-
                         if (_errorMessage != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 16.0),
@@ -161,7 +156,6 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-
                         _isLoading
                             ? CircularProgressIndicator()
                             : Row(
@@ -207,7 +201,6 @@ class _LoginPageState extends State<LoginPage> {
                                 ],
                               ),
                         const SizedBox(height: 16),
-
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
