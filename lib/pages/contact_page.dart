@@ -88,6 +88,12 @@ class _ContactPageState extends State<ContactPage> {
                     Icons.search,
                     color: Theme.of(context).colorScheme.secondary,
                   ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: 2),
+                  ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(
