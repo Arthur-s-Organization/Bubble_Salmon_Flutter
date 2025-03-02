@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MessageInputBar extends StatefulWidget {
-  // Les deux paramètres sont optionnels
   final void Function(String? text, String? base64Image)? onSendMessage;
   final FocusNode? focusNode;
 
@@ -22,8 +21,7 @@ class MessageInputBar extends StatefulWidget {
 class _MessageInputBarState extends State<MessageInputBar> {
   final TextEditingController _messageController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-  XFile?
-      _selectedImage; // Ajouter cette ligne pour stocker l'image sélectionnée
+  XFile? _selectedImage;
 
   Future<void> _showImageSourceDialog() async {
     await showModalBottomSheet(
@@ -93,9 +91,7 @@ class _MessageInputBarState extends State<MessageInputBar> {
       base64Image = base64Encode(bytes);
     }
 
-    // Envoyer le message si au moins l'un des deux est présent
     if (message.isNotEmpty || base64Image != null) {
-      // Envoyer null pour le texte si vide
       widget.onSendMessage
           ?.call(message.isNotEmpty ? message : null, base64Image);
       _messageController.clear();

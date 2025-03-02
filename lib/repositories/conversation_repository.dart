@@ -102,7 +102,6 @@ class ConversationRepository {
   Future<Map<String, dynamic>> sendMessage(
       String conversationId, String? text, String? base64Image) async {
     try {
-      // Vérifier qu'au moins l'un des deux paramètres est non null
       if (text == null && base64Image == null) {
         return {
           "status": "error",
@@ -159,7 +158,6 @@ class ConversationRepository {
     }
   }
 
-  // Dans conversation_repository.dart
   Future<Map<String, dynamic>> getOrCreateConversation(
       String recipientId) async {
     try {

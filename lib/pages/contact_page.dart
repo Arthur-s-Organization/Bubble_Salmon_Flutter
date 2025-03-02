@@ -33,7 +33,6 @@ class _ContactPageState extends State<ContactPage> {
       _isLoading = true;
     });
 
-    // Si un terme de recherche est fourni, utilisez-le pour la requête API
     final response = searchTerm != null && searchTerm.isNotEmpty
         ? await _contactRepository.searchContacts(searchTerm)
         : await _contactRepository.getContacts();
@@ -41,16 +40,13 @@ class _ContactPageState extends State<ContactPage> {
     setState(() {
       _isLoading = false;
       _contacts = response["contacts"];
-      // Pas besoin de trier car l'API renvoie déjà les contacts triés
     });
   }
 
-  // Méthode pour obtenir une map de contacts regroupés par initiale
   Map<String, List<User>> _getContactsByInitial() {
     final Map<String, List<User>> contactsByInitial = {};
 
     for (var contact in _contacts) {
-      // Utiliser la première lettre du nom d'utilisateur comme clé
       final initial = contact.username[0].toUpperCase();
 
       if (!contactsByInitial.containsKey(initial)) {
@@ -60,7 +56,6 @@ class _ContactPageState extends State<ContactPage> {
       contactsByInitial[initial]!.add(contact);
     }
 
-    // Trier les clés alphabétiquement
     final sortedKeys = contactsByInitial.keys.toList()..sort();
     final sortedMap = {
       for (var key in sortedKeys) key: contactsByInitial[key]!
@@ -80,7 +75,7 @@ class _ContactPageState extends State<ContactPage> {
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextField(
-                style: TextStyle(color: Colors.white), // Texte saisi en blanc
+                style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Rechercher...",
                   hintStyle: TextStyle(color: Colors.white),
@@ -110,7 +105,11 @@ class _ContactPageState extends State<ContactPage> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _contacts.isEmpty
-                      ? const Center(child: Text("Aucun contact trouvé."))
+                      ? const Center(
+                          child: Text(
+                          "Aucun contact trouvé.",
+                          style: TextStyle(color: Colors.white),
+                        ))
                       : ListView.builder(
                           padding: const EdgeInsets.all(8.0),
                           itemCount: contactsByInitial.keys.length +

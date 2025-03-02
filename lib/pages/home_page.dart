@@ -6,6 +6,7 @@ import 'package:bubble_salmon/widget/action_bar.dart';
 import 'package:bubble_salmon/widget/bottom_bar.dart';
 import 'package:bubble_salmon/widget/conversation_preview.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
+import 'package:bubble_salmon/widget/error_handler.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,13 +31,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadConversations();
-    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -48,66 +47,48 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  void _onSearchChanged() {
-    if (_searchController.text.isEmpty) {
-      setState(() {
-        _filteredConversations = _conversations;
-      });
-    } else if (_searchController.text.isNotEmpty) {
-      _performSearch(_searchController.text);
-    }
-  }
-
-  Future<void> _performSearch(String query) async {
+  Future<void> _loadConversations([String? searchTerm]) async {
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
     });
 
     try {
-      final response = await _conversationRepository.searchConversations(query);
+      final response = searchTerm != null && searchTerm.isNotEmpty
+          ? await _conversationRepository.searchConversations(searchTerm)
+          : await _conversationRepository.conversationsPreview();
 
       setState(() {
         _isLoading = false;
-        if (response["status"] == "success") {
-          _filteredConversations = response["conversations"];
-        } else {
-          _errorMessage = response["message"];
-          _filteredConversations = [];
-        }
       });
+
+      if (response["status"] == "success") {
+        setState(() {
+          _conversations = response["conversations"];
+          _filteredConversations = _conversations;
+        });
+      } else {
+        setState(() {
+          _errorMessage = "Impossible de charger les conversations";
+        });
+        ErrorHandler.showError(context,
+            customMessage: "Impossible de charger les conversations");
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Erreur lors de la recherche: ${e.toString()}";
-        _filteredConversations = [];
+        _errorMessage = "Impossible de charger les conversations";
       });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de charger les conversations. Vérifiez votre connexion internet.");
     }
-  }
-
-  Future<void> _loadConversations() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final response = await _conversationRepository.conversationsPreview();
-
-    setState(() {
-      _isLoading = false;
-      if (response["status"] == "success") {
-        _conversations = response["conversations"];
-        _filteredConversations = _conversations;
-      } else {
-        _errorMessage = response["message"];
-      }
-    });
   }
 
   void _toggleOrder() {
     setState(() {
       _conversations = _conversations.reversed.toList();
-      if (!_isSearching || _searchController.text.isEmpty) {
-        _filteredConversations = _conversations;
-      }
+      _filteredConversations = _conversations;
     });
   }
 
@@ -116,7 +97,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _isSearching = !_isSearching;
       if (!_isSearching) {
         _searchController.clear();
-        _filteredConversations = _conversations;
+        _loadConversations();
       }
     });
   }
@@ -125,85 +106,94 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 12.0),
-                      child: _isSearching
-                          ? TextField(
-                              controller: _searchController,
-                              autofocus: true,
-                              decoration: InputDecoration(
-                                hintText: 'Rechercher une conversation...',
-                                hintStyle: const TextStyle(color: Colors.grey),
-                                prefixIcon: const Icon(Icons.search,
-                                    color: Colors.grey),
-                                suffixIcon: IconButton(
-                                  icon: const Icon(Icons.close,
-                                      color: Colors.grey),
-                                  onPressed: _toggleSearch,
-                                ),
-                                filled: true,
-                                fillColor: Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 14),
-                              ),
-                              style: const TextStyle(color: Colors.white),
-                            )
-                          : ActionBar(
-                              loadConversations: _loadConversations,
-                              toggleOrder: _toggleOrder,
-                              toggleSearch: _toggleSearch,
-                            ),
+      body: Column(
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: _isSearching
+                ? TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher une conversation...',
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: _toggleSearch,
+                      ),
+                      filled: true,
+                      fillColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    Expanded(
-                      child: _filteredConversations.isEmpty
-                          ? Center(
-                              child: Text(
-                                _isSearching &&
-                                        _searchController.text.isNotEmpty
-                                    ? "Aucune conversation trouvée pour votre recherche."
-                                    : "Aucune conversation pour le moment.",
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                            )
-                          : ListView.separated(
-                              padding: const EdgeInsets.only(top: 12),
-                              itemCount: _filteredConversations.length,
-                              itemBuilder: (context, index) {
-                                final conversation =
-                                    _filteredConversations[index];
-                                return InkWell(
-                                  child: ConversationPreview(
-                                    name: conversation.name,
-                                    message: conversation.lastMessage?.text ??
-                                        "Aucun message",
-                                    time: Global.formatPreviewTime(
-                                      conversation.updatedAt,
-                                    ),
-                                    imageFileName: conversation.imageFileName,
-                                    imageRepository:
-                                        conversation.imageRepository,
+                    style: const TextStyle(color: Colors.white),
+                    onChanged: (value) {
+                      _loadConversations(value);
+                    },
+                  )
+                : ActionBar(
+                    loadConversations: _loadConversations,
+                    toggleOrder: _toggleOrder,
+                    toggleSearch: _toggleSearch,
+                  ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Impossible de charger les conversations",
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => _loadConversations(),
+                              child: Text("Réessayer"),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _filteredConversations.isEmpty
+                        ? Center(
+                            child: Text(
+                              _isSearching
+                                  ? "Aucune conversation trouvée pour votre recherche."
+                                  : "Aucune conversation pour le moment.",
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(top: 12),
+                            itemCount: _filteredConversations.length,
+                            itemBuilder: (context, index) {
+                              final conversation =
+                                  _filteredConversations[index];
+                              return InkWell(
+                                child: ConversationPreview(
+                                  name: conversation.name,
+                                  message: conversation.lastMessage?.text ??
+                                      "Aucun message",
+                                  time: Global.formatPreviewTime(
+                                    conversation.updatedAt,
                                   ),
-                                  onTap: () async {
+                                  imageFileName: conversation.imageFileName,
+                                  imageRepository: conversation.imageRepository,
+                                ),
+                                onTap: () async {
+                                  try {
                                     final result = await Navigator.pushNamed(
                                       context,
                                       '/conversation',
@@ -215,15 +205,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     if (result == true) {
                                       _loadConversations();
                                     }
-                                  },
-                                );
-                              },
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 10),
-                            ),
-                    ),
-                  ],
-                ),
+                                  } catch (e) {
+                                    ErrorHandler.showError(context,
+                                        customMessage:
+                                            "Impossible d'ouvrir la conversation");
+                                  }
+                                },
+                              );
+                            },
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 10),
+                          ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomBar(currentIndex: 1, context: context),
     );
   }

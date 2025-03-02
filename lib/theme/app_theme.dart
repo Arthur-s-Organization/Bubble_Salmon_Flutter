@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
-      // Définition des couleurs
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
         primary: Color(0xFFFE6F61),
