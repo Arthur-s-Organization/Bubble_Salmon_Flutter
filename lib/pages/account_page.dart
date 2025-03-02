@@ -4,6 +4,7 @@ import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:bubble_salmon/widget/bottom_bar.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
+import 'package:bubble_salmon/widget/error_handler.dart';
 import 'package:flutter/material.dart';
 
 class AccountPage extends StatefulWidget {
@@ -18,6 +19,7 @@ class _AccountPageState extends State<AccountPage> {
       AuthRepository(apiAuthService: ApiAuthService());
   User? _user;
   bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -26,18 +28,57 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _loadUser() async {
-    final response = await authRepository.getUser();
-
     setState(() {
-      _isLoading = false;
-      _user = response["user"];
+      _isLoading = true;
+      _errorMessage = null;
     });
+
+    try {
+      final response = await authRepository.getUser();
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response["status"] == "success") {
+        setState(() {
+          _user = response["user"];
+        });
+      } else {
+        setState(() {
+          _errorMessage = "Impossible de charger les informations du profil";
+        });
+        ErrorHandler.showError(context,
+            customMessage: "Impossible de charger les informations du profil");
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Impossible de charger les informations du profil";
+      });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de charger les informations du profil. Vérifiez votre connexion internet.");
+    }
   }
 
   Future<void> _logout() async {
-    await authRepository.logout();
-    if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    try {
+      final response = await authRepository.logout();
+      if (response["status"] == "success") {
+        if (mounted) {
+          ErrorHandler.showSuccess(context, "Déconnexion réussie");
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/login', (route) => false);
+        }
+      } else {
+        ErrorHandler.showError(context,
+            customMessage: "Impossible de se déconnecter. Veuillez réessayer.");
+      }
+    } catch (e) {
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de se déconnecter. Vérifiez votre connexion internet.");
     }
   }
 
@@ -47,10 +88,24 @@ class _AccountPageState extends State<AccountPage> {
       appBar: const CustomAppBar(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _user == null
-              ? const Center(
-                  child:
-                      Text("Erreur lors de la récupération des informations."))
+          : _errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Impossible de charger les informations du profil",
+                        style: TextStyle(color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadUser,
+                        child: Text("Réessayer"),
+                      ),
+                    ],
+                  ),
+                )
               : Column(
                   children: [
                     Container(
@@ -70,6 +125,13 @@ class _AccountPageState extends State<AccountPage> {
                                           _user!.imageRepository!,
                                           _user!.imageFileName!),
                                       fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          "assets/img/placeholderColor.png",
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
                                     )
                                   : Image.asset(
                                       "assets/img/placeholderColor.png",
@@ -98,10 +160,10 @@ class _AccountPageState extends State<AccountPage> {
                           Global.formatDate(_user!.birthdate),
                         ),
                         const SizedBox(height: 10),
-                        _buildInfoRow('Nom d’utilisateur', _user!.username),
+                        _buildInfoRow("Nom d'utilisateur", _user!.username),
                         const SizedBox(height: 10),
                         _buildInfoRow(
-                          'Date d’inscription',
+                          "Date d'inscription",
                           Global.formatDate(_user!.createdAt),
                         ),
                       ],
@@ -145,7 +207,7 @@ class _AccountPageState extends State<AccountPage> {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
       child: RichText(
         text: TextSpan(
           text: '$label : ',

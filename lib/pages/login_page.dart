@@ -1,6 +1,7 @@
 import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/services/auth_service.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
+import 'package:bubble_salmon/widget/error_handler.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -33,27 +34,36 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
         _errorMessage = "Veuillez remplir tous les champs.";
       });
+      ErrorHandler.showError(context,
+          customMessage: "Veuillez remplir tous les champs.");
       return;
     }
 
-    final response = await _authRepository.login(username, password);
+    try {
+      final response = await _authRepository.login(username, password);
 
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (response["status"] == "success") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Connexion réussie !"),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Navigator.pushReplacementNamed(context, "/home");
-    } else {
       setState(() {
-        _errorMessage = response["message"];
+        _isLoading = false;
       });
+
+      if (response["status"] == "success") {
+        ErrorHandler.showSuccess(context, "Connexion réussie !");
+        Navigator.pushReplacementNamed(context, "/home");
+      } else {
+        String errorMsg = "Identifiants incorrects. Veuillez réessayer.";
+        setState(() {
+          _errorMessage = errorMsg;
+        });
+        ErrorHandler.showError(context, customMessage: errorMsg);
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Erreur de connexion au serveur";
+      });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de se connecter au serveur. Vérifiez votre connexion internet.");
     }
   }
 
@@ -112,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                                 Icons.person_outline,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
-                              hintText: 'Nom d’utilisateur',
+                              hintText: "Nom d'utilisateur",
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 16,
@@ -145,17 +155,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        if (_errorMessage != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: Text(
-                              _errorMessage!,
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
                         _isLoading
                             ? CircularProgressIndicator()
                             : Row(
@@ -205,7 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Vous n’avez pas encore de compte ? ",
+                              "Vous n'avez pas encore de compte ? ",
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 14,

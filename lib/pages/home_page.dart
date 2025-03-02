@@ -6,6 +6,7 @@ import 'package:bubble_salmon/widget/action_bar.dart';
 import 'package:bubble_salmon/widget/bottom_bar.dart';
 import 'package:bubble_salmon/widget/conversation_preview.dart';
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
+import 'package:bubble_salmon/widget/error_handler.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -59,18 +60,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
       setState(() {
         _isLoading = false;
-        if (response["status"] == "success") {
+      });
+
+      if (response["status"] == "success") {
+        setState(() {
           _conversations = response["conversations"];
           _filteredConversations = _conversations;
-        } else {
-          _errorMessage = response["message"];
-        }
-      });
+        });
+      } else {
+        setState(() {
+          _errorMessage = "Impossible de charger les conversations";
+        });
+        ErrorHandler.showError(context,
+            customMessage: "Impossible de charger les conversations");
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = "Erreur lors du chargement: ${e.toString()}";
+        _errorMessage = "Impossible de charger les conversations";
       });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de charger les conversations. Vérifiez votre connexion internet.");
     }
   }
 
@@ -135,50 +146,76 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _filteredConversations.isEmpty
+                : _errorMessage != null
                     ? Center(
-                        child: Text(
-                          _isSearching
-                              ? "Aucune conversation trouvée pour votre recherche."
-                              : "Aucune conversation pour le moment.",
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Impossible de charger les conversations",
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => _loadConversations(),
+                              child: Text("Réessayer"),
+                            ),
+                          ],
                         ),
                       )
-                    : ListView.separated(
-                        padding: const EdgeInsets.only(top: 12),
-                        itemCount: _filteredConversations.length,
-                        itemBuilder: (context, index) {
-                          final conversation = _filteredConversations[index];
-                          return InkWell(
-                            child: ConversationPreview(
-                              name: conversation.name,
-                              message: conversation.lastMessage?.text ??
-                                  "Aucun message",
-                              time: Global.formatPreviewTime(
-                                conversation.updatedAt,
-                              ),
-                              imageFileName: conversation.imageFileName,
-                              imageRepository: conversation.imageRepository,
+                    : _filteredConversations.isEmpty
+                        ? Center(
+                            child: Text(
+                              _isSearching
+                                  ? "Aucune conversation trouvée pour votre recherche."
+                                  : "Aucune conversation pour le moment.",
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
                             ),
-                            onTap: () async {
-                              final result = await Navigator.pushNamed(
-                                context,
-                                '/conversation',
-                                arguments: {
-                                  'conversationId': conversation.id,
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.only(top: 12),
+                            itemCount: _filteredConversations.length,
+                            itemBuilder: (context, index) {
+                              final conversation =
+                                  _filteredConversations[index];
+                              return InkWell(
+                                child: ConversationPreview(
+                                  name: conversation.name,
+                                  message: conversation.lastMessage?.text ??
+                                      "Aucun message",
+                                  time: Global.formatPreviewTime(
+                                    conversation.updatedAt,
+                                  ),
+                                  imageFileName: conversation.imageFileName,
+                                  imageRepository: conversation.imageRepository,
+                                ),
+                                onTap: () async {
+                                  try {
+                                    final result = await Navigator.pushNamed(
+                                      context,
+                                      '/conversation',
+                                      arguments: {
+                                        'conversationId': conversation.id,
+                                      },
+                                    );
+
+                                    if (result == true) {
+                                      _loadConversations();
+                                    }
+                                  } catch (e) {
+                                    ErrorHandler.showError(context,
+                                        customMessage:
+                                            "Impossible d'ouvrir la conversation");
+                                  }
                                 },
                               );
-
-                              if (result == true) {
-                                _loadConversations();
-                              }
                             },
-                          );
-                        },
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 10),
-                      ),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 10),
+                          ),
           ),
         ],
       ),

@@ -3,9 +3,11 @@ import 'package:bubble_salmon/class/message.dart';
 import 'package:bubble_salmon/global/utils.dart';
 import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/repositories/conversation_repository.dart';
+
 import 'package:bubble_salmon/widget/conversation/conversation_app_bar.dart';
 import 'package:bubble_salmon/widget/conversation/message_bubble.dart';
 import 'package:bubble_salmon/widget/conversation/message_input_bar.dart';
+import 'package:bubble_salmon/widget/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -46,6 +48,7 @@ class _ConversationPageState extends State<ConversationPage> {
   String? currentUserId;
   bool _isLoading = false;
   bool _isInitialLoad = true;
+  String? _errorMessage;
   final FocusNode _messageFocusNode = FocusNode();
 
   final StreamController<List<Message>> _messagesStreamController =
@@ -75,21 +78,32 @@ class _ConversationPageState extends State<ConversationPage> {
   }
 
   Future<void> _initializeUser() async {
-    final result = await widget.authRepository.getUserId();
-    if (result["status"] == "success") {
-      setState(() {
-        currentUserId = result["user"].toString();
-      });
-    }
+    try {
+      final result = await widget.authRepository.getUserId();
+      if (result["status"] == "success") {
+        setState(() {
+          currentUserId = result["user"].toString();
+        });
+      } else {}
+    } catch (e) {}
   }
 
   Future<void> _initialLoadMessages() async {
     if (_isLoading) return;
 
     _isLoading = true;
+    setState(() {
+      _errorMessage = null;
+    });
+
     try {
       final result = await widget.conversationRepository
           .getMessages(widget.conversationId);
+
+      setState(() {
+        _isLoading = false;
+      });
+
       if (result["status"] == "success") {
         final messages = List<Message>.from(result["messages"])
           ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
@@ -98,7 +112,6 @@ class _ConversationPageState extends State<ConversationPage> {
           _messages = messages;
         });
 
-        // Émettre également les messages dans le stream
         _messagesStreamController.add(messages);
 
         if (_isInitialLoad) {
@@ -107,9 +120,21 @@ class _ConversationPageState extends State<ConversationPage> {
             _isInitialLoad = false;
           });
         }
+      } else {
+        setState(() {
+          _errorMessage = "Impossible de charger les messages";
+        });
+        ErrorHandler.showError(context,
+            customMessage: "Impossible de charger les messages");
       }
-    } finally {
-      _isLoading = false;
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Impossible de charger les messages";
+      });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de charger les messages. Vérifiez votre connexion internet.");
     }
   }
 
@@ -120,12 +145,16 @@ class _ConversationPageState extends State<ConversationPage> {
     try {
       final result = await widget.conversationRepository
           .getMessages(widget.conversationId);
+
       if (result["status"] == "success") {
         final newMessages = List<Message>.from(result["messages"])
           ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
         if (_messages.hasChanged(newMessages)) {
-          _messages = newMessages;
+          setState(() {
+            _messages = newMessages;
+            _errorMessage = null;
+          });
 
           _messagesStreamController.add(newMessages);
 
@@ -135,7 +164,15 @@ class _ConversationPageState extends State<ConversationPage> {
             });
           }
         }
+      } else {
+        setState(() {
+          _errorMessage = "Impossible de rafraîchir les messages";
+        });
       }
+    } catch (e) {
+      setState(() {
+        _errorMessage = "Impossible de rafraîchir les messages";
+      });
     } finally {
       _isLoading = false;
     }
@@ -152,14 +189,16 @@ class _ConversationPageState extends State<ConversationPage> {
   }
 
   Future<void> _loadConversation() async {
-    final response = await widget.conversationRepository
-        .getConversationById(widget.conversationId);
+    try {
+      final response = await widget.conversationRepository
+          .getConversationById(widget.conversationId);
 
-    setState(() {
       if (response["status"] == "success") {
-        _conversation = response["conversation"];
-      }
-    });
+        setState(() {
+          _conversation = response["conversation"];
+        });
+      } else {}
+    } catch (e) {}
   }
 
   @override
@@ -181,61 +220,87 @@ class _ConversationPageState extends State<ConversationPage> {
         body: Column(
           children: [
             Expanded(
-              child: StreamBuilder<List<Message>>(
-                stream: _messagesStreamController.stream,
-                initialData: _messages,
-                builder: (context, snapshot) {
-                  final messages = snapshot.data ?? [];
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      final messageDate =
-                          DateTime.parse(message.createdAt.toString());
-
-                      bool showDateSeparator = index == 0 ||
-                          DateTime.parse(
-                                      messages[index - 1].createdAt.toString())
-                                  .day !=
-                              messageDate.day;
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+              child: _errorMessage != null
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (showDateSeparator)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                Global.formatDate(messageDate),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          MessageBubble(
-                            message: message.text ?? '',
-                            time: Global.formatTime(messageDate),
-                            messageType: message.messageType,
-                            bubbleType: message.userId == currentUserId
-                                ? BubbleType.sender
-                                : BubbleType.receiver,
-                            imageUrl: message.imageRepository != null &&
-                                    message.imageFileName != null
-                                ? Global.getImagePath(message.imageRepository!,
-                                    message.imageFileName!)
-                                : null,
-                            senderName: message.username,
-                            isGroupe: _conversation?.type == 3,
+                          Text(
+                            "Impossible de charger les messages",
+                            style: const TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _initialLoadMessages,
+                            child: Text("Réessayer"),
                           ),
                         ],
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
+                    )
+                  : StreamBuilder<List<Message>>(
+                      stream: _messagesStreamController.stream,
+                      initialData: _messages,
+                      builder: (context, snapshot) {
+                        if (_isInitialLoad && _isLoading) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        final messages = snapshot.data ?? [];
+                        return ListView.builder(
+                          controller: _scrollController,
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            final message = messages[index];
+                            final messageDate =
+                                DateTime.parse(message.createdAt.toString());
+
+                            bool showDateSeparator = index == 0 ||
+                                DateTime.parse(messages[index - 1]
+                                            .createdAt
+                                            .toString())
+                                        .day !=
+                                    messageDate.day;
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                if (showDateSeparator)
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 8),
+                                    child: Text(
+                                      Global.formatDate(messageDate),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                MessageBubble(
+                                  message: message.text ?? '',
+                                  time: Global.formatTime(messageDate),
+                                  messageType: message.messageType,
+                                  bubbleType: message.userId == currentUserId
+                                      ? BubbleType.sender
+                                      : BubbleType.receiver,
+                                  imageUrl: message.imageRepository != null &&
+                                          message.imageFileName != null
+                                      ? Global.getImagePath(
+                                          message.imageRepository!,
+                                          message.imageFileName!)
+                                      : null,
+                                  senderName: message.username,
+                                  isGroupe: _conversation?.type == 3,
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
             ),
             MessageInputBar(
               onSendMessage: (text, base64Image) async {
@@ -252,11 +317,22 @@ class _ConversationPageState extends State<ConversationPage> {
   Future<void> _handleSendMessage(String? text, String? base64Image) async {
     if (text == null && base64Image == null) return;
 
-    final result = await widget.conversationRepository
-        .sendMessage(widget.conversationId, text, base64Image);
-    if (result["status"] == "success") {
-      await _refreshMessages();
-      _scrollToBottom();
+    try {
+      final result = await widget.conversationRepository
+          .sendMessage(widget.conversationId, text, base64Image);
+
+      if (result["status"] == "success") {
+        await _refreshMessages();
+        _scrollToBottom();
+      } else {
+        ErrorHandler.showError(context,
+            customMessage:
+                "Impossible d'envoyer le message. Veuillez réessayer.");
+      }
+    } catch (e) {
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible d'envoyer le message. Vérifiez votre connexion internet.");
     }
   }
 }

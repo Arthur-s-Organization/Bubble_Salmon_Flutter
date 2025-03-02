@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bubble_salmon/repositories/auth_repository.dart';
 import 'package:bubble_salmon/services/auth_service.dart';
+
 import 'package:bubble_salmon/widget/custom_app_bar.dart';
+import 'package:bubble_salmon/widget/error_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -29,7 +31,6 @@ class _RegisterPageState extends State<RegisterPage> {
       AuthRepository(apiAuthService: ApiAuthService());
 
   bool _isLoading = false;
-  String? _errorMessage;
 
   Future<void> _selectBirthDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -48,24 +49,29 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source);
+    try {
+      final pickedFile = await _picker.pickImage(source: source);
 
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-      List<int> imageBytes = await imageFile.readAsBytes();
-      String base64Image = base64Encode(imageBytes);
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        List<int> imageBytes = await imageFile.readAsBytes();
+        String base64Image = base64Encode(imageBytes);
 
-      setState(() {
-        _imageFile = imageFile;
-        _base64Image = base64Image;
-      });
+        setState(() {
+          _imageFile = imageFile;
+          _base64Image = base64Image;
+        });
+      }
+    } catch (e) {
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de sélectionner l'image. Veuillez réessayer.");
     }
   }
 
   Future<void> _register() async {
     setState(() {
       _isLoading = true;
-      _errorMessage = null;
     });
 
     final firstName = _firstNameController.text.trim();
@@ -86,38 +92,50 @@ class _RegisterPageState extends State<RegisterPage> {
         _base64Image == null) {
       setState(() {
         _isLoading = false;
-        _errorMessage =
-            "Veuillez remplir tous les champs et choisir une photo.";
       });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Veuillez remplir tous les champs et choisir une photo.");
       return;
     }
 
-    final response = await _authRepository.register(
-      firstName,
-      lastName,
-      username,
-      password,
-      phone,
-      birthDate,
-      _base64Image!,
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (response["status"] == "success") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Inscription réussie !"),
-          backgroundColor: Colors.green,
-        ),
+    try {
+      final response = await _authRepository.register(
+        firstName,
+        lastName,
+        username,
+        password,
+        phone,
+        birthDate,
+        _base64Image!,
       );
-      Navigator.pushReplacementNamed(context, "/login");
-    } else {
+
       setState(() {
-        _errorMessage = response["message"];
+        _isLoading = false;
       });
+
+      if (response["status"] == "success") {
+        ErrorHandler.showSuccess(context, "Inscription réussie !");
+        Navigator.pushReplacementNamed(context, "/login");
+      } else {
+        String errorMsg = "Erreur lors de l'inscription";
+        if (response["message"] != null &&
+            response["message"].contains("Username")) {
+          errorMsg = "Ce nom d'utilisateur est déjà utilisé";
+        } else if (response["message"] != null &&
+            response["message"].contains("Phone")) {
+          errorMsg = "Ce numéro de téléphone est déjà utilisé";
+        }
+
+        ErrorHandler.showError(context, customMessage: errorMsg);
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ErrorHandler.showError(context,
+          customMessage:
+              "Impossible de se connecter au serveur. Vérifiez votre connexion internet.");
     }
   }
 
@@ -154,7 +172,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             Icons.account_box_outlined),
                         const SizedBox(height: 16),
                         buildInputField(context, _usernameController,
-                            'Nom d’utilisateur', Icons.person_outline),
+                            "Nom d'utilisateur", Icons.person_outline),
                         const SizedBox(height: 16),
                         buildInputField(context, _passwordController,
                             'Mot de passe', Icons.lock_outline,
@@ -195,15 +213,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.image,
-                                        color: Colors.redAccent),
+                                    icon: Icon(Icons.image,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
                                     onPressed: () =>
                                         _pickImage(ImageSource.gallery),
                                   ),
                                   const SizedBox(width: 20),
                                   IconButton(
-                                    icon: const Icon(Icons.camera_alt,
-                                        color: Colors.redAccent),
+                                    icon: Icon(Icons.camera_alt,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
                                     onPressed: () =>
                                         _pickImage(ImageSource.camera),
                                   ),
